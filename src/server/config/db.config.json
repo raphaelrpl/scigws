@@ -1,0 +1,13 @@
+{
+    "scidb": {
+        "host": "localhost",
+        "port": 1239
+    },
+    "postgres": {
+        "host": "localhost",
+        "user": "postgres",
+        "password": "",
+        "database": "modis_metadata",
+        "port": 5433
+    }
+}

@@ -1,0 +1,37 @@
+{
+    "identification": {
+        "title": "SciWCS",
+        "abstract": "a web time series sensing on top of scidb",
+        "service_type": "OGC WCS",
+        "service_type_version": "2.0.1"
+    },
+    "provider": {
+        "name": "Instituto Nacional de Pesquisas Espaciais",
+        "site": "http://dpi.inpe.br",
+        "contact": {
+            "individual_name": "Test Person",
+            "position_name": "Test Position",
+            "contact_info": {
+                "phone": {
+                    "voice": "55 12 3208-6000"
+                },
+                "address": {
+                    "delivery_point": "Av dos Astronautas, 1758",
+                    "city": "Sao Jose dos Campos",
+                    "country": "Brazil",
+                    "postal_code": "12227-010",
+                    "mail_address": "webmaster@inpe.br"
+                }
+            }
+        }
+    },
+    "profiles": [
+        {"name": "http://www.opengis.net/spec/WCS_protocol-binding_s"},
+        {"name": "http://www.opengis.net/spec/WCS_protocol-binding_get-kvp/1.0/conf/get-kvp"},
+        {"name": "http://www.opengis.net/spec/WCS_geotiff-coverages/1.0/conf/geotiff-coverage"}
+    ],
+    "formats": [
+        {"name": "image/tiff"},
+        {"name": "application/gml+xml"}
+    ]
+}

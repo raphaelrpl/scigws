@@ -1,0 +1,78 @@
+<!-- ORIGINAL SCHEMA SCIDB DATABASE -->
+CREATE ARRAY mod13q1 <ndvi:int16, evi:int16, quality:uint16, red:int16, nir:int16, blue:int16, mir:int16,
+         view_zenith:int16, sun_zenith:int16, azimuth:int16, day:int16, reliability:int8>[col_id=43200:71999,600,0, row_id=33600:71999,600,0, time_id=0:*,1,0]
+
+
+<!-- USE TO LOCAL TEST-->
+CREATE ARRAY mod13q1 <ndvi:int16, evi:int16, quality:uint16, red:int16, nir:int16, blue:int16, mir:int16,
+         view_zenith:int16, sun_zenith:int16, azimuth:int16, day:int16, reliability:int8>[col_id=43200:43205,2,0, row_id=33600:33605,2,0, time_id=0:3,1,0]
+
+store(
+    join(
+        join(
+            join(
+                join(
+                    join(
+                        join(
+                            join(
+                                join(
+                                    join(
+                                        join(
+                                            join(
+                                                build(<ndvi:int16>[col_id=43200:43205,2,0, row_id=33600:33605,2,0, time_id=0:3,1,0], random() % 5000),
+                                                build(<evi:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+                                            ),
+                                            build(<quality:uint16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+                                        ),
+                                        build(<red:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+                                    ),
+                                    build(<nir:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+                                ),
+                                build(<blue:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+                            ),
+                            build(<mir:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+                        ),
+                        build(<view_zenith:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+                    ),
+                    build(<sun_zenith:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+                ),
+                build(<azimuth:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+            ),
+            build(<day:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)
+        ),
+        build(<reliability:int8>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 100)
+    ),
+    mod13q1);
+
+save(mytestarrayMod13, '/home/scidb/mytestarrayMod13.out.txt', -2, 'dense');
+remove(mytestarrayMod13);
+load(secondarrayMod13, '/home/scidb/mytestarrayMod13.out.txt', -2);
+
+
+
+<!-- SQL -->
+    INSERT INTO geo_array (name, description, detail, crs, x_dim_name, x_min, x_max, x_resolution, y_dim_name, y_min, y_max, y_resolution, t_dim_name, t_min, t_max, t_resolution, t_unit_id)
+         VALUES ('mod13q1', 'Vegetation Indices 16-Day L3 Global 250m', 'https://lpdaac.usgs.gov/products/modis_products_table/mod13q1', '+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ', 'col_id', 43200, 71999, 231.65635826395825, 'row_id', 33600, 71999, 231.65635826374995, 'time_id', '2000-02-18', '2014-08-13', 16, 1);
+
+
+    INSERT INTO geo_array_attributes (array_id, name, description, range_min, range_max, scale, missing_value)
+         VALUES (3, 'ndvi', '250m 16 days NDVI', -2000, 10000, 0.0001, -3000),
+                (3, 'evi', '250m 16 days EVI', -2000, 10000, 0.0001, -3000),
+                (3, 'quality', '250m 16 days VI Quality detailed QA', 0, 65534, 1.0, 65535),
+                (3, 'red', '250m 16 days red reflectance (Band 1)', 0, 10000, 0.0001, -1000),
+                (3, 'nir', '250m 16 days NIR reflectance (Band 2)', 0, 10000, 0.0001, -1000),
+                (3, 'blue', '250m 16 days blue reflectance (Band 3)', 0, 10000, 0.0001, -1000),
+                (3, 'mir', '250m 16 days MIR reflectance (Band 7)', 0, 10000, 0.0001, -1000),
+                (3, 'view_zenith', '250m 16 days view zenith angle', -9000, 9000, 0.01, -10000),
+                (3, 'sun_zenith', '250m 16 days sun zenith angle', -9000, 9000, 0.01, -10000),
+                (3, 'azimuth', '250m 16 days relative azimuth angle', -3600, 3600, 0.1, -4000),
+                (3, 'day', ' 250m 16 days composite day of the year', 1, 366, 1.0, -1),
+                (3, 'reliability', '250m 16 days pixel reliability summary QA', 0, 3, 1.0, -1);
+
+
+    <!-- TEMPORAL INSERTS **CHANGE ARRAY ID ON IF IT IS DIFFERENT** -->
+    <!-- array_id INTEGER, time_point INTEGER NOT NULL, date TIMESTAMP NOT NULL, PRIMARY KEY(array_id, time_point) -->
+    INSERT INTO geo_array_timeline (array_id, time_point, date) values (3, 0, '2000-02-18 00:00:00');
+    INSERT INTO geo_array_timeline (array_id, time_point, date) values (3, 1, '2000-03-05 00:00:00');
+    INSERT INTO geo_array_timeline (array_id, time_point, date) values (3, 2, '2000-03-23 00:00:00');
+    INSERT INTO geo_array_timeline (array_id, time_point, date) values (3, 3, '2000-04-08 00:00:00');

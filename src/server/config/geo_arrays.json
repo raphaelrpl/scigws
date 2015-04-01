@@ -1,0 +1,241 @@
+{
+    "mcd43a4": {
+        "name": "mcd43a4",
+        "description": "Nadir BRDF-Adjusted Reflectance 16-Day L3 Global 500m",
+        "detail": "https://lpdaac.usgs.gov/products/modis_products_table/mcd43a4",
+        "crs": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ",
+        "x_dim_name": "col_id",
+        "x_min": 21600,
+        "x_max": 35999,
+        "x_resolution": 500,
+        "y_dim_name": "row_id",
+        "y_min": 16800,
+        "y_max": 35999,
+        "y_resolution": 500,
+        "t_dim_name": "time_id",
+        "t_min": "2000-03-05",
+        "t_max": "2014-07-28",
+        "t_resolution": 16,
+        "t_unit_id": 1,
+        "attributes": [
+            {
+                "name": "b1",
+                "description": "Nadir_Reflectance_Band1",
+                "range_min": 0,
+                "range_max": 32766,
+                "scale": 0.0001,
+                "missing_value": 32767
+            },
+            {
+                "name": "b2",
+                "description": "Nadir_Reflectance_Band2",
+                "range_min": 0,
+                "range_max": 32766,
+                "scale": 0.0001,
+                "missing_value": 32767
+            },
+            {
+                "name": "b3",
+                "description": "Nadir_Reflectance_Band3",
+                "range_min": 0,
+                "range_max": 32766,
+                "scale": 0.0001,
+                "missing_value": 32767
+            },
+            {
+                "name": "b4",
+                "description": "Nadir_Reflectance_Band4",
+                "range_min": 0,
+                "range_max": 32766,
+                "scale": 0.0001,
+                "missing_value": 32767
+            },
+            {
+                "name": "b5",
+                "description": "Nadir_Reflectance_Band5",
+                "range_min": 0,
+                "range_max": 32766,
+                "scale": 0.0001,
+                "missing_value": 32767
+            },
+            {
+                "name": "b6",
+                "description": "Nadir_Reflectance_Band6",
+                "range_min": 0,
+                "range_max": 32766,
+                "scale": 0.0001,
+                "missing_value": 32767
+            },
+            {
+                "name": "b7",
+                "description": "Nadir_Reflectance_Band7",
+                "range_min": 0,
+                "range_max": 32766,
+                "scale": 0.0001,
+                "missing_value": 32767
+            }
+        ]
+    },
+    "mod09q1": {
+        "name": "mod09q1",
+        "description": "Surface Reflectance 8-Day L3 Global 250m",
+        "detail": "https://lpdaac.usgs.gov/products/modis_products_table/mod09q1",
+        "crs": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ",
+        "x_dim_name": "col_id",
+        "x_min": 43200,
+        "x_max": 71999,
+        "x_resolution": 231.65635826395825,
+        "y_dim_name": "row_id",
+        "y_min": 33600,
+        "y_max": 71999,
+        "y_resolution": 231.65635826374995,
+        "t_dim_name": "time_id",
+        "t_min": "2000-02-18",
+        "t_max": "2014-08-13",
+        "t_resolution": 8,
+        "t_unit_id": 1,
+        "attributes": [
+            {
+                "name": "red",
+                "description": "250m Surface Reflectance Band 1 (620–670 nm)",
+                "range_min": -100,
+                "range_max": 16000,
+                "scale": 0.0001,
+                "missing_value": -28672
+            },
+            {
+                "name": "nir",
+                "description": "250m Surface Reflectance Band 2 (841–876 nm)",
+                "range_min": -100,
+                "range_max": 16000,
+                "scale": 0.0001,
+                "missing_value": -28672
+            },
+            {
+                "name": "quality",
+                "description": "250m Reflectance Band Quality",
+                "range_min": 0,
+                "range_max": 32766,
+                "scale": 1.0,
+                "missing_value": 65535
+            }
+        ]
+    },
+    "mod13q1": {
+        "name": "mod13q1",
+        "description": "Vegetation Indices 16-Day L3 Global 250m",
+        "detail": "https://lpdaac.usgs.gov/products/modis_products_table/mod13q1",
+        "crs": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ",
+        "x_dim_name": "col_id",
+        "x_min": 43200,
+        "x_max": 71999,
+        "x_resolution": 231.65635826395825,
+        "y_dim_name": "row_id",
+        "y_min": 33600,
+        "y_max": 71999,
+        "y_resolution": 231.65635826374995,
+        "t_dim_name": "time_id",
+        "t_min": "2000-02-18",
+        "t_max": "2014-08-13",
+        "t_resolution": 16,
+        "t_unit_id": 1,
+        "attributes": [
+            {
+                "name": "ndvi",
+                "description": "250m 16 days NDVI",
+                "range_min": -2000,
+                "range_max": 10000,
+                "scale": 0.0001,
+                "missing_value": -3000
+            },
+            {
+                "name": "evi",
+                "description": "250m 16 days EVI",
+                "range_min": -2000,
+                "range_max": 10000,
+                "scale": 0.0001,
+                "missing_value": -3000
+            },
+            {
+                "name": "quality",
+                "description": "250m 16 days VI Quality detailed QA",
+                "range_min": 0,
+                "range_max": 65534,
+                "scale": 1.0,
+                "missing_value": 65535
+            },
+            {
+                "name": "red",
+                "description": "250m 16 days red reflectance (Band 1)",
+                "range_min": 0,
+                "range_max": 10000,
+                "scale": 0.0001,
+                "missing_value": -1000
+            },
+            {
+                "name": "nir",
+                "description": "250m 16 days NIR reflectance (Band 2)",
+                "range_min": 0,
+                "range_max": 10000,
+                "scale": 0.0001,
+                "missing_value": -1000
+            },
+            {
+                "name": "blue",
+                "description": "250m 16 days blue reflectance (Band 3)",
+                "range_min": 0,
+                "range_max": 10000,
+                "scale": 0.0001,
+                "missing_value": -1000
+            },
+            {
+                "name": "mir",
+                "description": "250m 16 days MIR reflectance (Band 7)",
+                "range_min": 0,
+                "range_max": 10000,
+                "scale": 0.0001,
+                "missing_value": -1000
+            },
+            {
+                "name": "view_zenith",
+                "description": "250m 16 days view zenith angle",
+                "range_min": -9000,
+                "range_max": 9000,
+                "scale": 0.01,
+                "missing_value": -10000
+            },
+            {
+                "name": "sun_zenith",
+                "description": "250m 16 days sun zenith angle",
+                "range_min": -9000,
+                "range_max": 9000,
+                "scale": 0.01,
+                "missing_value": -10000
+            },
+            {
+                "name": "azimuth",
+                "description": "250m 16 days relative azimuth angle",
+                "range_min": -3600,
+                "range_max": 3600,
+                "scale": 0.1,
+                "missing_value": -4000
+            },
+            {
+                "name": "day",
+                "description": "250m 16 days composite day of the year",
+                "range_min": 1,
+                "range_max": 366,
+                "scale": 1.0,
+                "missing_value": -1
+            },
+            {
+                "name": "reliability",
+                "description": "250m 16 days pixel reliability summary QA",
+                "range_min": 0,
+                "range_max": 3,
+                "scale": 1.0,
+                "missing_value": -1
+            }
+        ]
+    }
+}
