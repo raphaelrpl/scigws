@@ -6,6 +6,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
                        url(r'^scidb/test/$', 'apps.core.views.test_scidb_connection', name="scidb_connection"),
                        url(r'^ows/', include('apps.ows.urls')),
-                       url(r'^admin/', include(admin.site.urls)))
+                       url(r'^admin/', include(admin.site.urls)),
+                       url(r'^wms/', include('apps.wms.urls')))
 
 urlpatterns += staticfiles_urlpatterns()

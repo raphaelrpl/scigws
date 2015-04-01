@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'apps.geo',
     'apps.ows',
     'apps.wcs',
+    'apps.wms',
 )
 
 MIDDLEWARE_CLASSES = (
