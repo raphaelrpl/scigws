@@ -1,0 +1,110 @@
+[
+  {
+    "pk": 1,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 1,
+      "time_point": 0,
+      "date": "2000-03-05"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 1,
+      "time_point": 1,
+      "date": "2000-03-21"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 1,
+      "time_point": 2,
+      "date": "2000-04-06"
+    }
+  },
+  {
+    "pk": 4,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 1,
+      "time_point": 3,
+      "date": "2000-03-22"
+    }
+  },
+  {
+    "pk": 5,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 2,
+      "time_point": 0,
+      "date": "2000-02-18"
+    }
+  },
+  {
+    "pk": 6,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 2,
+      "time_point": 1,
+      "date": "2000-02-26"
+    }
+  },
+  {
+    "pk": 7,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 2,
+      "time_point": 2,
+      "date": "2000-03-05"
+    }
+  },
+  {
+    "pk": 8,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 2,
+      "time_point": 3,
+      "date": "2000-03-13"
+    }
+  },
+  {
+    "pk": 9,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 3,
+      "time_point": 0,
+      "date": "2000-02-18"
+    }
+  },
+  {
+    "pk": 10,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 3,
+      "time_point": 1,
+      "date": "2000-03-05"
+    }
+  },
+  {
+    "pk": 11,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 3,
+      "time_point": 2,
+      "date": "2000-03-21"
+    }
+  },
+  {
+    "pk": 12,
+    "model": "geo.geoarraytimeline",
+    "fields": {
+      "array": 3,
+      "time_point": 3,
+      "date": "2000-04-06"
+    }
+  }
+]

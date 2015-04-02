@@ -1,0 +1,71 @@
+[
+  {
+    "pk": 1,
+    "model": "geo.geoarray",
+    "fields": {
+      "name": "mcd43a4",
+      "description": "Nadir BRDF-Adjusted Reflectance 16-Day L3 Global 500m",
+      "detail": "https://lpdaac.usgs.gov/products/modis_products_table/mcd43a4",
+      "crs": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ",
+      "x_dim_name": "col_id",
+      "x_min": 21600,
+      "x_max": 35999,
+      "x_resolution": 500,
+      "y_dim_name": "row_id",
+      "y_min": 16800,
+      "y_max": 35999,
+      "y_resolution": 500,
+      "t_dim_name": "time_id",
+      "t_min": "2000-03-05",
+      "t_max": "2014-07-28",
+      "t_resolution": 16,
+      "t_unit_id": 1
+    }
+  },
+  {
+    "pk": 2,
+    "model": "geo.geoarray",
+    "fields": {
+      "name": "mod09q1",
+      "description": "Surface Reflectance 8-Day L3 Global 250m",
+      "detail": "https://lpdaac.usgs.gov/products/modis_products_table/mod09q1",
+      "crs": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ",
+      "x_dim_name": "col_id",
+      "x_min": 43200,
+      "x_max": 71999,
+      "x_resolution": 231.65635826395825,
+      "y_dim_name": "row_id",
+      "y_min": 33600,
+      "y_max": 71999,
+      "y_resolution": 231.65635826374995,
+      "t_dim_name": "time_id",
+      "t_min": "2000-02-18",
+      "t_max": "2014-08-13",
+      "t_resolution": 8,
+      "t_unit_id": 1
+    }
+  },
+  {
+    "pk": 3,
+    "model": "geo.geoarray",
+    "fields": {
+      "name": "mod13q1",
+      "description": "Vegetation Indices 16-Day L3 Global 250m",
+      "detail": "https://lpdaac.usgs.gov/products/modis_products_table/mod13q1",
+      "crs": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ",
+      "x_dim_name": "col_id",
+      "x_min": 43200,
+      "x_max": 71999,
+      "x_resolution": 231.65635826395825,
+      "y_dim_name": "row_id",
+      "y_min": 33600,
+      "y_max": 71999,
+      "y_resolution": 231.65635826374995,
+      "t_dim_name": "time_id",
+      "t_min": "2000-02-18",
+      "t_max": "2014-08-13",
+      "t_resolution": 16,
+      "t_unit_id": 1
+    }
+  }
+]

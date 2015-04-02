@@ -74,5 +74,5 @@ load(secondarrayMod13, '/home/scidb/mytestarrayMod13.out.txt', -2);
     <!-- array_id INTEGER, time_point INTEGER NOT NULL, date TIMESTAMP NOT NULL, PRIMARY KEY(array_id, time_point) -->
     INSERT INTO geo_array_timeline (array_id, time_point, date) values (3, 0, '2000-02-18 00:00:00');
     INSERT INTO geo_array_timeline (array_id, time_point, date) values (3, 1, '2000-03-05 00:00:00');
-    INSERT INTO geo_array_timeline (array_id, time_point, date) values (3, 2, '2000-03-23 00:00:00');
+    INSERT INTO geo_array_timeline (array_id, time_point, date) values (3, 2, '2000-03-21 00:00:00');
     INSERT INTO geo_array_timeline (array_id, time_point, date) values (3, 3, '2000-04-08 00:00:00');

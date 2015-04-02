@@ -1,0 +1,288 @@
+[
+  {
+    "pk": 1,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 1,
+      "name": "b1",
+      "description": "Nadir_Reflectance_Band1",
+      "range_min": 0,
+      "range_max": 32766,
+      "scale": 0.0001,
+      "missing_value": 32767
+    }
+  },
+  {
+    "pk": 2,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 1,
+      "name": "b2",
+      "description": "Nadir_Reflectance_Band2",
+      "range_min": 0,
+      "range_max": 32766,
+      "scale": 0.0001,
+      "missing_value": 32767
+    }
+  },
+  {
+    "pk": 3,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 1,
+      "name": "b3",
+      "description": "Nadir_Reflectance_Band3",
+      "range_min": 0,
+      "range_max": 32766,
+      "scale": 0.0001,
+      "missing_value": 32767
+    }
+  },
+  {
+    "pk": 4,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 1,
+      "name": "b4",
+      "description": "Nadir_Reflectance_Band4",
+      "range_min": 0,
+      "range_max": 32766,
+      "scale": 0.0001,
+      "missing_value": 32767
+    }
+  },
+  {
+    "pk": 5,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 1,
+      "name": "b5",
+      "description": "Nadir_Reflectance_Band5",
+      "range_min": 0,
+      "range_max": 32766,
+      "scale": 0.0001,
+      "missing_value": 32767
+    }
+  },
+  {
+    "pk": 6,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 1,
+      "name": "b6",
+      "description": "Nadir_Reflectance_Band6",
+      "range_min": 0,
+      "range_max": 32766,
+      "scale": 0.0001,
+      "missing_value": 32767
+    }
+  },
+  {
+    "pk": 7,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 1,
+      "name": "b7",
+      "description": "Nadir_Reflectance_Band7",
+      "range_min": 0,
+      "range_max": 32766,
+      "scale": 0.0001,
+      "missing_value": 32767
+    }
+  },
+  {
+    "pk": 8,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 2,
+      "name": "red",
+      "description": "250m Surface Reflectance Band 1 (620–670 nm)",
+      "range_min": -100,
+      "range_max": 16000,
+      "scale": 0.0001,
+      "missing_value": -28672
+    }
+  },
+  {
+    "pk": 9,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 2,
+      "name": "nir",
+      "description": "250m Surface Reflectance Band 2 (841–876 nm)",
+      "range_min": -100,
+      "range_max": 16000,
+      "scale": 0.0001,
+      "missing_value": -28672
+    }
+  },
+  {
+    "pk": 10,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 2,
+      "name": "quality",
+      "description": "250m Reflectance Band Quality",
+      "range_min": 0,
+      "range_max": 32766,
+      "scale": 1.0,
+      "missing_value": 65535
+    }
+  },
+  {
+    "pk": 11,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "ndvi",
+      "description": "250m 16 days NDVI",
+      "range_min": -2000,
+      "range_max": 10000,
+      "scale": 0.0001,
+      "missing_value": -3000
+    }
+  },
+  {
+    "pk": 12,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "evi",
+      "description": "250m 16 days EVI",
+      "range_min": -2000,
+      "range_max": 10000,
+      "scale": 0.0001,
+      "missing_value": -3000
+    }
+  },
+  {
+    "pk": 13,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "quality",
+      "description": "250m 16 days VI Quality detailed QA",
+      "range_min": 0,
+      "range_max": 65534,
+      "scale": 1.0,
+      "missing_value": 65535
+    }
+  },
+  {
+    "pk": 14,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "red",
+      "description": "250m 16 days red reflectance (Band 1)",
+      "range_min": 0,
+      "range_max": 10000,
+      "scale": 0.0001,
+      "missing_value": -1000
+    }
+  },
+  {
+    "pk": 15,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "nir",
+      "description": "250m 16 days NIR reflectance (Band 2)",
+      "range_min": 0,
+      "range_max": 10000,
+      "scale": 0.0001,
+      "missing_value": -1000
+    }
+  },
+  {
+    "pk": 16,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "blue",
+      "description": "250m 16 days blue reflectance (Band 3)",
+      "range_min": 0,
+      "range_max": 10000,
+      "scale": 0.0001,
+      "missing_value": -1000
+    }
+  },
+  {
+    "pk": 17,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "mir",
+      "description": "250m 16 days MIR reflectance (Band 7)",
+      "range_min": 0,
+      "range_max": 10000,
+      "scale": 0.0001,
+      "missing_value": -1000
+    }
+  },
+  {
+    "pk": 18,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "view_zenith",
+      "description": "250m 16 days view zenith angle",
+      "range_min": -9000,
+      "range_max": 9000,
+      "scale": 0.01,
+      "missing_value": -10000
+    }
+  },
+  {
+    "pk": 19,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "sun_zenith",
+      "description": "250m 16 days sun zenith angle",
+      "range_min": -9000,
+      "range_max": 9000,
+      "scale": 0.01,
+      "missing_value": -10000
+    }
+  },
+  {
+    "pk": 20,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "azimuth",
+      "description": "250m 16 days relative azimuth angle",
+      "range_min": -3600,
+      "range_max": 3600,
+      "scale": 0.1,
+      "missing_value": -4000
+    }
+  },
+  {
+    "pk": 21,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "day",
+      "description": "250m 16 days composite day of the year",
+      "range_min": 1,
+      "range_max": 366,
+      "scale": 1.0,
+      "missing_value": -1
+    }
+  },
+  {
+    "pk": 22,
+    "model": "geo.geoarrayattribute",
+    "fields": {
+      "array": 3,
+      "name": "reliability",
+      "description": "250m 16 days pixel reliability summary QA",
+      "range_min": 0,
+      "range_max": 3,
+      "scale": 1.0,
+      "missing_value": -1
+    }
+  }
+]
