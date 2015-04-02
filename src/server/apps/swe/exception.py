@@ -3,4 +3,4 @@ class SWEException(Exception):
 
 
 class SWEIOError(SWEException):
-    pass__author__ = 'scidb'
+    pass

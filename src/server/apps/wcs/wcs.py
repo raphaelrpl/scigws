@@ -1,5 +1,5 @@
 from xml.etree import ElementTree
-from apps.ows.ows import Metadata
+from apps.ows.ows import OWSMeta
 from exception import throws_exception
 from apps.scidb.db import SciDB, scidbapi
 from exception import WCSException
@@ -9,9 +9,7 @@ from base import WCSBase
 from apps.swe.swe import SWEMeta
 from validators import is_valid_url
 from apps.gml.gml import GMLMeta
-
 from datetime import datetime
-from dateutil import parser
 import psycopg2
 
 
@@ -39,7 +37,7 @@ class GetCapabilities(WCSBase):
         return ElementTree.Element("{http://www.opengis.net/wcs/2.0}Capabilities", attrib=self.attrib)
 
     def initialize_metadata(self):
-        self.metadata = Metadata()
+        self.metadata = OWSMeta()
         self.metadata.generate_profiles()
         self.metadata.generate_operations(self.url)
         self.dom.append(self.metadata.root_identification)

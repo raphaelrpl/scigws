@@ -5,7 +5,7 @@ import os
 import json
 
 
-class Metadata(object):
+class OWSMeta(object):
     """ OWS metadata for Web Coverage Service 2.0 or...."""
     root_identification = None
     root_provider = None
