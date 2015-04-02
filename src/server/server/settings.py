@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'apps.ows',
     'apps.wcs',
     'apps.wms',
+    'apps.scidb',
 )
 
 MIDDLEWARE_CLASSES = (
