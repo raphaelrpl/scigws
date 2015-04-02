@@ -28,7 +28,7 @@ class Capabilities(View):
         x = WMS()
         if service.lower() == 'wms':
             if req.lower() == 'getcapabilities':
-                return HttpResponse(WMS(), content_type='application/xml')
+                return HttpResponse(x.capabilities(), content_type='application/xml')
             elif req.lower() == 'getmap':
                 x = WMS()
                 return HttpResponse(x.map(), content_type='application/xml')
