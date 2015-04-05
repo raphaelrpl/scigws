@@ -38,8 +38,14 @@ class Identification(Meta):
 
 
 class DBConfig(Meta):
+    scidb = {}
+
     def __init__(self, path="config/db.config.json"):
         super(DBConfig, self).__init__(path)
+        self.scidb = self.data.get('scidb')
+
+    def get_scidb_credentials(self):
+        return self.scidb
 
 
 class GeoArray(Meta):

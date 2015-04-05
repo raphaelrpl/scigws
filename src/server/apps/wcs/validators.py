@@ -42,6 +42,9 @@ class DateToPoint(DateValidator):
             idy = (year - self.startyear) * ppy
             iii = (self.startday - 1) / self.period
             res = idy + idd - iii
+            if (date[0:4] == self.dt[0:4]):
+                # TODO: Subtract value differs. 
+                pass
         return res
 
     @staticmethod

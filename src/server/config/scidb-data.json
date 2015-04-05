@@ -1,14 +1,17 @@
 [
   {
     "name": "mcd43a4",
+    "array": "CREATE ARRAY mcd43a4<b1:int16,b2:int16,b3:int16,b4:int16,b5:int16,b6:int16,b7:int16> [col_id=21600:21605,2,0,row_id=16800:16805,2,0,time_id=0:3,1,0]",
     "afl": "store(join(join(join(join(join(join(build(<b1: int16>[col_id=21600: 21605, 2, 0,row_id=16800: 16805, 2, 0,time_id=0: 3, 1, 0], random() % 5000), build(<b2: int16>[col_id=21600: 21605, 2, 0,row_id=16800: 16805, 2, 0,time_id=0: 3, 1, 0], random() % 5000)), build(<b3: int16>[col_id=21600: 21605, 2, 0,row_id=16800: 16805, 2, 0,time_id=0: 3, 1, 0], random() % 5000)), build(<b4: int16>[col_id=21600: 21605, 2, 0,row_id=16800: 16805, 2, 0,time_id=0: 3, 1, 0], random() % 5000)), build(<b5: int16>[col_id=21600: 21605, 2, 0,row_id=16800: 16805, 2, 0,time_id=0: 3, 1, 0], random() % 5000)), build(<b6: int16>[col_id=21600: 21605, 2, 0,row_id=16800: 16805, 2, 0,time_id=0: 3, 1, 0], random() % 5000)), build(<b7: int16>[col_id=21600: 21605, 2, 0,row_id=16800: 16805, 2, 0,time_id=0: 3, 1, 0], random() % 5000)), mcd43a4)"
   },
   {
     "name": "mod09q1",
+    "array": "CREATE ARRAY mod09q1 <red:int16, nir:int16, quality:uint16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0]",
     "afl": "store(join(join(build(<red:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000), build(<nir:int16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)), build(<quality:uint16>[col_id=43200:43205,2,0,row_id=33600:33605,2,0,time_id=0:3,1,0], random() % 5000)), mod09q1)"
   },
   {
     "name": "mod13q1",
+    "array": "CREATE ARRAY mod13q1 <ndvi:int16, evi:int16, quality:uint16, red:int16, nir:int16, blue:int16, mir:int16, view_zenith:int16, sun_zenith:int16, azimuth:int16, day:int16, reliability:int8>[col_id=43200:43205,2,0, row_id=33600:33605,2,0, time_id=0:3,1,0]",
     "afl": "store(join(join(join(join(join(join(join(join(join(join(join(build(<ndvi: int16>[col_id=43200: 43205, 2, 0, row_id=33600: 33605, 2, 0, time_id=0: 3, 1, 0], random() % 5000),build(<evi: int16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<quality: uint16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<red: int16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<nir: int16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<blue: int16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<mir: int16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<view_zenith: int16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<sun_zenith: int16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<azimuth: int16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<day: int16>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 5000)),build(<reliability: int8>[col_id=43200: 43205, 2, 0,row_id=33600: 33605, 2, 0,time_id=0: 3, 1, 0], random() % 100)),mod13q1)"
   }
 ]

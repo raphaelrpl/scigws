@@ -40,7 +40,10 @@ class GeoArrayAttribute(models.Model):
 class GeoArrayTimeLine(models.Model):
     array = models.ForeignKey(GeoArray)
     time_point = models.IntegerField()
-    date = models.DateField()
+    date = models.DateTimeField()
+
+    def __str__(self):
+        return "%s, %d" % (self.array.name, self.time_point)
 
 
 class GeoArrayDataFile(models.Model):

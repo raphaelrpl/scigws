@@ -10,6 +10,9 @@ from apps.swe.swe import SWEMeta
 from validators import is_valid_url
 from apps.gml.gml import GMLMeta
 from datetime import datetime
+
+from apps.geo.models import GeoArrayTimeLine, GeoArray
+
 import psycopg2
 
 
@@ -46,8 +49,8 @@ class GetCapabilities(WCSBase):
         self.service_provider = self.metadata.root_provider
         self.dom.append(self.metadata.root_operations)
         self.service_metadata = ElementTree.SubElement(self.dom, "{%s}ServiceMetadata" % self.ns_dict['wcs'])
-        ElementTree.SubElement(self.service_metadata, "{%s}formatSupported" % self.ns_dict['wcs']).text = "application/gml+xml"
-        ElementTree.SubElement(self.service_metadata, "{%s}formatSupported" % self.ns_dict['wcs']).text = "image/tiff"
+        format1 = ElementTree.SubElement(self.service_metadata, "{%s}formatSupported" % self.ns_dict['wcs']).text = "application/gml+xml"
+        format2 = ElementTree.SubElement(self.service_metadata, "{%s}formatSupported" % self.ns_dict['wcs']).text = "image/tiff"
 
     def get_capabilities(self):
         self.contents = ElementTree.SubElement(self.dom, "{%s}Contents" % self.ns_dict['wcs'])
@@ -65,13 +68,7 @@ class GetCapabilities(WCSBase):
             raise WCSException("DB config is empty! \"%s\"" % self.config)
 
         # Check time series available in scidb, get metadata from postgres
-        psql_connection = psycopg2.connect(**self.config.get('postgres'))
-        cursor = psql_connection.cursor()
-        cursor.execute("""SELECT g.name, gt.time_point, gt.date FROM geo_array g,
-            geo_array_timeline gt WHERE g.array_id = gt.array_id""")
-        results = cursor.fetchall()
-        cursor.close()
-        psql_connection.close()
+        results = GeoArrayTimeLine.objects.all()
 
         for coverage in self.geo_arrays:
             dataseries = ElementTree.SubElement(self.dom, "wcseo:DatasetSeriesSummary")
@@ -80,10 +77,9 @@ class GetCapabilities(WCSBase):
             # time_period = ElementTree.SubElement(dataseries, "{%s}TimePeriod" % self.ns_dict['gml'])
             temporal = ElementTree.SubElement(dataseries, "{%s}TemporalDomain" % self.ns_dict['wcs'])
             for result in results:
-                if self.geo_arrays[coverage].get('name') == result[0]:
+                if self.geo_arrays[coverage].get('name') == result.array.name:
                     tree = ElementTree.SubElement(temporal, "{%s}timePosition" % self.ns_dict['gml'])
-                    if isinstance(result[2], datetime):
-                        tree.text = result[2].strftime("%Y-%m-%d")
+                    tree.text = result.date.strftime("%Y-%m-%d")
         return pretty_xml(self.dom), 200
 
 
@@ -98,13 +94,10 @@ class DescribeCoverage(WCSBase):
     coverages_offered = None
     metadatas = None
 
-    def __init__(self, params, coverages_offered, metadatas, attributes, times=[]):
+    def __init__(self, coverages_offered):
         super(DescribeCoverage, self).__init__()
-        self.params = params
         self.coverages_offered = coverages_offered
-        self.metadatas = [metadata for metadata in metadatas if metadata[1] in coverages_offered]
-        self.times = times
-        self.attributes = attributes
+        self.metadatas = GeoArray.objects.filter(name__in=coverages_offered)
 
     def _create_dom(self):
         return ElementTree.Element("{http://www.opengis.net/wcs/2.0}CoverageDescriptions", attrib=self.attrib)
@@ -116,11 +109,13 @@ class DescribeCoverage(WCSBase):
             coverages_name = identifiers.split(',')
             for identifier in coverages_name:
                 if identifier in self.coverages_offered:
-                    metadata = [meta for meta in self.metadatas if identifier == meta[1]][0]
+                    metadata = [meta for meta in self.metadatas if identifier == meta.name][0]
                     self.coverage_description = ElementTree.SubElement(self.dom, "{%s}CoverageDescription" %
                                                                        self.ns_dict['wcs'], attrib={"gml:id": identifier})
+                    print(metadata)
+                    times = metadata.geoarraytimeline_set.all()
+                    print(times)
 
-                    times = self.get_times_db(metadata[0])
                     gml = GMLMeta(identifier, self.geo_arrays.get(identifier), times)
                     bounded = gml.get_bounded_by()
                     self.coverage_description.append(bounded)
@@ -137,12 +132,12 @@ class DescribeCoverage(WCSBase):
                                                               "{%s}TemporalDomain" % self.ns_dict['wcs'])
 
                     self.times_domain = []
-                    for timeposition in self.times:
-                        if timeposition[0] == metadata[0]:
-                            tree = ElementTree.SubElement(self.temp_domain, "{%s}timePosition" % self.ns_dict['gml'])
-                            if isinstance(timeposition[1], datetime):
-                                tree.text = timeposition[1].strftime("%Y-%m-%d")
-                            self.times_domain.append(tree)
+                    for timeposition in times:
+                        # if timeposition[0] == metadata[0]:
+                        tree = ElementTree.SubElement(self.temp_domain, "{%s}timePosition" % self.ns_dict['gml'])
+                        # if isinstance(timeposition[1], datetime):
+                        tree.text = timeposition.date.strftime("%Y-%m-%d")
+                        self.times_domain.append(tree)
 
                     self.rangeType = ElementTree.SubElement(self.coverage_description,
                                                             "{%s}rangeType" % self.ns_dict['gmlcov'])
@@ -189,11 +184,10 @@ class GetCoverage(WCSBase):
     formats = ["application/xml", "application/gml+xml", "image/tiff", "GTiff"]
     metadata = None
 
-    def __init__(self, params, coverages_offered, metadatas):
+    def __init__(self, coverages_offered, metadatas):
         super(GetCoverage, self).__init__()
-        self.params = params
         self.coverages_offered = coverages_offered
-        self.metadatas = [metadata for metadata in metadatas if metadata[1] in coverages_offered]
+        self.metadatas = [metadata for metadata in metadatas if metadata.name in coverages_offered]
 
     def _create_dom(self):
         return ElementTree.Element("{http://www.opengis.net/gmlcov/1.0}GridCoverage", attrib=self.attrib)
@@ -220,7 +214,8 @@ class GetCoverage(WCSBase):
             if not is_valid_url(epsg):
                 epsg = ''
             params[key] = {'epsg': epsg, 'dimension': dimension}
-            if key not in self.metadata:
+            print(self.metadata)
+            if key != self.metadata.x_dim_name and key != self.metadata.y_dim_name and key != self.metadata.y_dim_name:
                 raise ValueError("\"%s\" is not valid axis. " % sub)
         return params
 
@@ -262,11 +257,16 @@ class GetCoverage(WCSBase):
         if coverageId:
             if coverageId in self.coverages_offered:
                 self.dom.attrib['{%s}id' % self.ns_dict['gml']] = coverageId
-                self.metadata = [meta for meta in self.metadatas if coverageId == meta[1]][0]
+                self.metadata = [meta for meta in self.metadatas if coverageId == meta.name][0]
                 geo = self.geo_arrays[coverageId]
                 if format in self.formats:
                     afl = ""
-                    times = self.get_times_db(self.metadata[0])
+                    # times = self.get_times_db(self.metadata[0])
+                    times = GeoArrayTimeLine.objects.filter(array__name=coverageId)
+                    range_time = [
+                        GeoArrayTimeLine.objects.filter(array__name=coverageId).first().time_point,
+                        GeoArrayTimeLine.objects.filter(array__name=coverageId).last().time_point
+                    ]
                     if subset:
                         try:
                             params = self.get_subset_from(subset)
@@ -288,8 +288,9 @@ class GetCoverage(WCSBase):
                             validator = DateToPoint(dt=start_date, period=period, startyear=int(start_date[:4]),
                                                     startday=datetime.strptime(start_date, '%Y-%M-%d').timetuple().tm_yday)
                             time_id = [validator(t) for t in times_day_year]
+                            print(time_id)
                         else:
-                            time_id = [times[0][1], times[-1][1]]
+                            time_id = range_time
                         afl = "subarray(%s, %s, %s, %s, %s, %s, %s)" % (
                             coverageId,
                             col_id[0],
@@ -304,10 +305,10 @@ class GetCoverage(WCSBase):
                             coverageId,
                             geo["x_min"],
                             geo["y_min"],
-                            times[0][1],
+                            range_time[0],
                             geo["x_max"],
                             geo["y_min"],
-                            times[-1][1]
+                            range_time[-1]
                         )
                     print "AFL Generated -> %s" % afl
                     gml = GMLMeta(identifier=coverageId, meta=geo, times=times)
@@ -340,7 +341,7 @@ class GetCoverage(WCSBase):
                     tuple_list.text = tuple_list.text.rstrip(',')
                     swe = SWEMeta(identifier=coverageId, meta=self.geo_arrays.get(coverageId))
                     swe_data_record = swe.get_data_record()
-                    ElementTree.SubElement(self.dom, "{%s}rangeType" % self.ns_dict['gmlcov']).append(swe_data_record)
+                    range_type = ElementTree.SubElement(self.dom, "{%s}rangeType" % self.ns_dict['gmlcov']).append(swe_data_record)
                     # self.dom.append(swe_data_record)
                     return pretty_xml(self.dom), 200, format
                 errors["message"] = "Unknown/not supported format"

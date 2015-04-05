@@ -1,5 +1,6 @@
 from xml.etree import ElementTree
 from exception import GMLException
+from apps.geo.models import GeoArrayTimeLine
 
 
 class GMLMeta(object):
@@ -18,8 +19,8 @@ class GMLMeta(object):
 
     def get_envelope_values(self):
         if self.times:
-            low = "%s %s %s" % (self.meta.get('x_min'), self.meta.get('y_min'), self.times[0][1])
-            high = "%s %s %s" % (self.meta.get('x_max'), self.meta.get('y_max'), self.times[-1][1])
+            low = "%s %s %s" % (self.meta.get('x_min'), self.meta.get('y_min'), self.times[0].time_point)
+            high = "%s %s %s" % (self.meta.get('x_max'), self.meta.get('y_max'), GeoArrayTimeLine.objects.filter(array__name=self.identifier).last().time_point)
             return low, high
         return "", ""
 
