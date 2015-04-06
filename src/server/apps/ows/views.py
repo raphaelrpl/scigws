@@ -44,7 +44,12 @@ class SimpleView(View):
                                 del value_iterator
                             scidb_connection.disconnect()
                             if params['request'].lower() == "getcapabilities" or not req:
-                                
+
+                                from apps.wcs.encoders import GetCapabilitiesEncoder
+
+                                c = GetCapabilitiesEncoder()
+                                return HttpResponse(c.serialize(c.encode()))
+
                                 capabilities = GetCapabilities("http://%s?" % (
                                     request.get_host()+request.path), coverages_offered=coverages_offered)
                                 xml_output, code = capabilities.get_capabilities()

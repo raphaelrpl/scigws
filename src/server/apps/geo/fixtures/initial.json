@@ -1,0 +1,465 @@
+[
+{
+    "fields": {
+        "crs": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ",
+        "t_min": "2000-03-05",
+        "name": "mcd43a4",
+        "x_resolution": 500,
+        "y_max": 35999,
+        "detail": "https://lpdaac.usgs.gov/products/modis_products_table/mcd43a4",
+        "y_resolution": 500,
+        "y_min": 16800,
+        "t_dim_name": "time_id",
+        "x_max": 35999,
+        "x_min": 21600,
+        "x_dim_name": "col_id",
+        "t_max": "2014-07-28",
+        "t_resolution": 16,
+        "t_unit_id": 1,
+        "y_dim_name": "row_id",
+        "description": "Nadir BRDF-Adjusted Reflectance 16-Day L3 Global 500m"
+    },
+    "model": "geo.geoarray",
+    "pk": 1
+},
+{
+    "fields": {
+        "crs": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ",
+        "t_min": "2000-02-18",
+        "name": "mod09q1",
+        "x_resolution": 231,
+        "y_max": 71999,
+        "detail": "https://lpdaac.usgs.gov/products/modis_products_table/mod09q1",
+        "y_resolution": 231,
+        "y_min": 33600,
+        "t_dim_name": "time_id",
+        "x_max": 71999,
+        "x_min": 43200,
+        "x_dim_name": "col_id",
+        "t_max": "2014-08-13",
+        "t_resolution": 8,
+        "t_unit_id": 1,
+        "y_dim_name": "row_id",
+        "description": "Surface Reflectance 8-Day L3 Global 250m"
+    },
+    "model": "geo.geoarray",
+    "pk": 2
+},
+{
+    "fields": {
+        "crs": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs ",
+        "t_min": "2000-02-18",
+        "name": "mod13q1",
+        "x_resolution": 231,
+        "y_max": 71999,
+        "detail": "https://lpdaac.usgs.gov/products/modis_products_table/mod13q1",
+        "y_resolution": 231,
+        "y_min": 33600,
+        "t_dim_name": "time_id",
+        "x_max": 71999,
+        "x_min": 43200,
+        "x_dim_name": "col_id",
+        "t_max": "2014-08-13",
+        "t_resolution": 16,
+        "t_unit_id": 1,
+        "y_dim_name": "row_id",
+        "description": "Vegetation Indices 16-Day L3 Global 250m"
+    },
+    "model": "geo.geoarray",
+    "pk": 3
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "b1",
+        "range_min": 0,
+        "range_max": 32766,
+        "array": 1,
+        "missing_value": 32767,
+        "description": "Nadir_Reflectance_Band1"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 1
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "b2",
+        "range_min": 0,
+        "range_max": 32766,
+        "array": 1,
+        "missing_value": 32767,
+        "description": "Nadir_Reflectance_Band2"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 2
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "b3",
+        "range_min": 0,
+        "range_max": 32766,
+        "array": 1,
+        "missing_value": 32767,
+        "description": "Nadir_Reflectance_Band3"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 3
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "b4",
+        "range_min": 0,
+        "range_max": 32766,
+        "array": 1,
+        "missing_value": 32767,
+        "description": "Nadir_Reflectance_Band4"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 4
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "b5",
+        "range_min": 0,
+        "range_max": 32766,
+        "array": 1,
+        "missing_value": 32767,
+        "description": "Nadir_Reflectance_Band5"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 5
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "b6",
+        "range_min": 0,
+        "range_max": 32766,
+        "array": 1,
+        "missing_value": 32767,
+        "description": "Nadir_Reflectance_Band6"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 6
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "b7",
+        "range_min": 0,
+        "range_max": 32766,
+        "array": 1,
+        "missing_value": 32767,
+        "description": "Nadir_Reflectance_Band7"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 7
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "red",
+        "range_min": -100,
+        "range_max": 16000,
+        "array": 2,
+        "missing_value": -28672,
+        "description": "250m Surface Reflectance Band 1 (620\u2013670 nm)"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 8
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "nir",
+        "range_min": -100,
+        "range_max": 16000,
+        "array": 2,
+        "missing_value": -28672,
+        "description": "250m Surface Reflectance Band 2 (841\u2013876 nm)"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 9
+},
+{
+    "fields": {
+        "scale": 1.0,
+        "name": "quality",
+        "range_min": 0,
+        "range_max": 32766,
+        "array": 2,
+        "missing_value": 65535,
+        "description": "250m Reflectance Band Quality"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 10
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "ndvi",
+        "range_min": -2000,
+        "range_max": 10000,
+        "array": 3,
+        "missing_value": -3000,
+        "description": "250m 16 days NDVI"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 11
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "evi",
+        "range_min": -2000,
+        "range_max": 10000,
+        "array": 3,
+        "missing_value": -3000,
+        "description": "250m 16 days EVI"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 12
+},
+{
+    "fields": {
+        "scale": 1.0,
+        "name": "quality",
+        "range_min": 0,
+        "range_max": 65534,
+        "array": 3,
+        "missing_value": 65535,
+        "description": "250m 16 days VI Quality detailed QA"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 13
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "red",
+        "range_min": 0,
+        "range_max": 10000,
+        "array": 3,
+        "missing_value": -1000,
+        "description": "250m 16 days red reflectance (Band 1)"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 14
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "nir",
+        "range_min": 0,
+        "range_max": 10000,
+        "array": 3,
+        "missing_value": -1000,
+        "description": "250m 16 days NIR reflectance (Band 2)"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 15
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "blue",
+        "range_min": 0,
+        "range_max": 10000,
+        "array": 3,
+        "missing_value": -1000,
+        "description": "250m 16 days blue reflectance (Band 3)"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 16
+},
+{
+    "fields": {
+        "scale": 0.0001,
+        "name": "mir",
+        "range_min": 0,
+        "range_max": 10000,
+        "array": 3,
+        "missing_value": -1000,
+        "description": "250m 16 days MIR reflectance (Band 7)"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 17
+},
+{
+    "fields": {
+        "scale": 0.01,
+        "name": "view_zenith",
+        "range_min": -9000,
+        "range_max": 9000,
+        "array": 3,
+        "missing_value": -10000,
+        "description": "250m 16 days view zenith angle"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 18
+},
+{
+    "fields": {
+        "scale": 0.01,
+        "name": "sun_zenith",
+        "range_min": -9000,
+        "range_max": 9000,
+        "array": 3,
+        "missing_value": -10000,
+        "description": "250m 16 days sun zenith angle"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 19
+},
+{
+    "fields": {
+        "scale": 0.1,
+        "name": "azimuth",
+        "range_min": -3600,
+        "range_max": 3600,
+        "array": 3,
+        "missing_value": -4000,
+        "description": "250m 16 days relative azimuth angle"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 20
+},
+{
+    "fields": {
+        "scale": 1.0,
+        "name": "day",
+        "range_min": 1,
+        "range_max": 366,
+        "array": 3,
+        "missing_value": -1,
+        "description": "250m 16 days composite day of the year"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 21
+},
+{
+    "fields": {
+        "scale": 1.0,
+        "name": "reliability",
+        "range_min": 0,
+        "range_max": 3,
+        "array": 3,
+        "missing_value": -1,
+        "description": "250m 16 days pixel reliability summary QA"
+    },
+    "model": "geo.geoarrayattribute",
+    "pk": 22
+},
+{
+    "fields": {
+        "date": "2000-03-05T00:00:00Z",
+        "array": 1,
+        "time_point": 0
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 1
+},
+{
+    "fields": {
+        "date": "2000-03-21T00:00:00Z",
+        "array": 1,
+        "time_point": 1
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 2
+},
+{
+    "fields": {
+        "date": "2000-04-06T00:00:00Z",
+        "array": 1,
+        "time_point": 2
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 3
+},
+{
+    "fields": {
+        "date": "2000-03-22T00:00:00Z",
+        "array": 1,
+        "time_point": 3
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 4
+},
+{
+    "fields": {
+        "date": "2000-02-18T00:00:00Z",
+        "array": 2,
+        "time_point": 0
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 5
+},
+{
+    "fields": {
+        "date": "2000-02-26T00:00:00Z",
+        "array": 2,
+        "time_point": 1
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 6
+},
+{
+    "fields": {
+        "date": "2000-03-05T00:00:00Z",
+        "array": 2,
+        "time_point": 2
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 7
+},
+{
+    "fields": {
+        "date": "2000-03-13T00:00:00Z",
+        "array": 2,
+        "time_point": 3
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 8
+},
+{
+    "fields": {
+        "date": "2000-02-18T00:00:00Z",
+        "array": 3,
+        "time_point": 0
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 9
+},
+{
+    "fields": {
+        "date": "2000-03-05T00:00:00Z",
+        "array": 3,
+        "time_point": 1
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 10
+},
+{
+    "fields": {
+        "date": "2000-03-21T00:00:00Z",
+        "array": 3,
+        "time_point": 2
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 11
+},
+{
+    "fields": {
+        "date": "2000-04-06T00:00:00Z",
+        "array": 3,
+        "time_point": 3
+    },
+    "model": "geo.geoarraytimeline",
+    "pk": 12
+}
+]

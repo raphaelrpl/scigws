@@ -1,5 +1,5 @@
 from xml.etree import ElementTree
-from apps.ows.ows import OWSMeta
+from apps.ows.ows_old import OWSMeta
 from exception import throws_exception
 from apps.scidb.db import SciDB, scidbapi
 from exception import WCSException
@@ -10,10 +10,7 @@ from apps.swe.swe import SWEMeta
 from validators import is_valid_url
 from apps.gml.gml import GMLMeta
 from datetime import datetime
-
 from apps.geo.models import GeoArrayTimeLine, GeoArray
-
-import psycopg2
 
 
 class GetCapabilities(WCSBase):
