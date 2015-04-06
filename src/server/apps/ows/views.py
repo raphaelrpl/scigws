@@ -47,8 +47,8 @@ class SimpleView(View):
 
                                 from apps.wcs.encoders import GetCapabilitiesEncoder
 
-                                c = GetCapabilitiesEncoder()
-                                return HttpResponse(c.serialize(c.encode()))
+                                # c = GetCapabilitiesEncoder()
+                                # return HttpResponse(c.serialize(c.encode()), content_type=c.content_type)
 
                                 capabilities = GetCapabilities("http://%s?" % (
                                     request.get_host()+request.path), coverages_offered=coverages_offered)
