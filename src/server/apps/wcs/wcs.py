@@ -211,8 +211,7 @@ class GetCoverage(WCSBase):
             if not is_valid_url(epsg):
                 epsg = ''
             params[key] = {'epsg': epsg, 'dimension': dimension}
-            print(self.metadata)
-            if key != self.metadata.x_dim_name and key != self.metadata.y_dim_name and key != self.metadata.y_dim_name:
+            if key != self.metadata.x_dim_name and key != self.metadata.y_dim_name and key != self.metadata.t_dim_name:
                 raise ValueError("\"%s\" is not valid axis. " % sub)
         return params
 
@@ -283,7 +282,8 @@ class GetCoverage(WCSBase):
                             period = self.geo_arrays[coverageId].get('t_resolution')
                             start_date = self.geo_arrays[coverageId].get('t_min')
                             validator = DateToPoint(dt=start_date, period=period, startyear=int(start_date[:4]),
-                                                    startday=datetime.strptime(start_date, '%Y-%M-%d').timetuple().tm_yday)
+                                                    startday=int(DateToPoint.format_to_day_of_year(start_date)[4:]))
+
                             time_id = [validator(t) for t in times_day_year]
                             print(time_id)
                         else:
@@ -304,7 +304,7 @@ class GetCoverage(WCSBase):
                             geo["y_min"],
                             range_time[0],
                             geo["x_max"],
-                            geo["y_min"],
+                            geo["y_max"],
                             range_time[-1]
                         )
                     print "AFL Generated -> %s" % afl

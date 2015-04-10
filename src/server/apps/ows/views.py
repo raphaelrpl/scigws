@@ -6,7 +6,8 @@ from apps.wcs.wcs import GetCapabilities, DescribeCoverage, GetCoverage
 from apps.wcs.exception import throws_exception
 from utils import DBConfig
 from apps.scidb.db import SciDB, scidbapi
-from apps.geo.models import GeoArray, GeoArrayTimeLine
+from apps.geo.models import GeoArray
+from handler import RequestHandler
 
 
 class SimpleView(View):

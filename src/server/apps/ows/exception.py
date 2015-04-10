@@ -6,5 +6,3 @@ class OWSException(Exception):
 class OWSIOError(OWSException):
     """ I/O operation failed. """
     pass
-
-

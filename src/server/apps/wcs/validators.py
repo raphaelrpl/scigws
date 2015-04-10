@@ -30,9 +30,7 @@ class DateValidator(object):
 
 class DateToPoint(DateValidator):
     def __call__(self, date):
-        """Return an time index (timid) from the input date (MODIS DOY) and time period (e.g 8 days). """
-        if DateToPoint.format_to_day_of_year(self.dt) == date:
-            return 0
+        """ Return an time index (timid) from the input date (MODIS DOY) and time period (e.g 8 days). """
         res = -1
         year = int(date[0:4])
         doy = int(date[4:7])
@@ -42,9 +40,6 @@ class DateToPoint(DateValidator):
             idy = (year - self.startyear) * ppy
             iii = (self.startday - 1) / self.period
             res = idy + idd - iii
-            if (date[0:4] == self.dt[0:4]):
-                # TODO: Subtract value differs. 
-                pass
         return res
 
     @staticmethod
