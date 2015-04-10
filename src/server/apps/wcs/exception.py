@@ -20,3 +20,17 @@ class WCSException(Exception):
     def __init__(self, msg):
         super(WCSException, self).__init__(msg)
         self.msg = msg
+
+
+class LocatorListException(Exception):
+    code = None
+
+    def __init__(self, *errors_list):
+        self.errors = errors_list
+
+
+class NoSuchCoverageException(LocatorListException):
+    code = "NoSuchCoverageException"
+
+    def __str__(self):
+        return "No such Coverage%s w: %s" % ("" if len(self.errors) == 1 else "s", ", ".join([i for i in self.errors]))

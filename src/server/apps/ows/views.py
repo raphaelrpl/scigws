@@ -12,6 +12,13 @@ from handler import RequestHandler
 
 class SimpleView(View):
     def process_request(self, request):
+        code = 200
+        try:
+            result = RequestHandler.handle(request)
+        except Exception as e:
+            result = e.message
+            code = 400
+
         wcs_errors = {}
         service = request.GET.get('service', '') or request.GET.get('SERVICE')
         if service and service.lower() == "wcs":

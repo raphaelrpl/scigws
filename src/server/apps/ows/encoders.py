@@ -9,3 +9,19 @@ class OWSEncoder(XMLEncoder):
             attributes[namespace_xlink("type")] = reftype
 
         return OWS_MAKER(node_name, **attributes)
+
+
+class OWSExceptionResponse(XMLEncoder):
+    def dispatch(self, message, version, code, locator=None):
+        exception_attributes = {"exceptionCode": str(code)}
+
+        if locator:
+            exception_attributes["locator"] = str(locator)
+
+        exception_text = (OWS_MAKER("ExceptionText", message),) if message else ()
+
+        return OWS_MAKER(
+            "ExceptionReport",
+            OWS_MAKER("Exception",
+                      *exception_text, **exception_attributes), version=version, **{namespace_xlink("lang"): "en"}
+        )
