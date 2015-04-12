@@ -12,12 +12,15 @@ from handler import RequestHandler
 
 class SimpleView(View):
     def process_request(self, request):
-        code = 200
-        try:
-            result = RequestHandler.handle(request)
-        except Exception as e:
-            result = e.message
-            code = 400
+        # code = 200
+        # try:
+        #     result = RequestHandler.handle(request)
+        #     print(result)
+        # except Exception as e:
+        #     result = e.message
+        #     print(result)
+        #     code = 400
+        # return HttpResponse(result.serialize(result.encode(request)), content_type=result.content_type, status=code)
 
         wcs_errors = {}
         service = request.GET.get('service', '') or request.GET.get('SERVICE')
@@ -56,7 +59,7 @@ class SimpleView(View):
                                 from apps.wcs.encoders import GetCapabilitiesEncoder
 
                                 # c = GetCapabilitiesEncoder()
-                                # return HttpResponse(c.serialize(c.encode()), content_type=c.content_type)
+                                # return HttpResponse(c.serialize(c.encode(request)), content_type=c.content_type)
 
                                 capabilities = GetCapabilities("http://%s?" % (
                                     request.get_host()+request.path), coverages_offered=coverages_offered)
@@ -65,7 +68,7 @@ class SimpleView(View):
                             elif params['request'].lower() == "describecoverage":
 
                                 describe = DescribeCoverage(coverages_offered)
-                                xml_output, code = describe.describe_coverage(request.GET.get("coverageId", ""))
+                                xml_output, code = describe.describe_coverage(request.GET.get("coverageID", ""))
                                 return HttpResponse(xml_output, content_type="application/xml", status=code)
                             elif params['request'].lower() == "getcoverage":
                                 

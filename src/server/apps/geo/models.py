@@ -21,7 +21,7 @@ class GeoArray(models.Model):
     t_unit_id = models.SmallIntegerField()
 
     def __str__(self):
-        return self.name
+        return "<GeoArray %s>" % self.name
 
 
 class GeoArrayAttribute(models.Model):
@@ -34,7 +34,7 @@ class GeoArrayAttribute(models.Model):
     missing_value = models.IntegerField()
 
     def __str__(self):
-        return self.name
+        return "<GeoArrayAttribute %s>" % self.name
 
 
 class GeoArrayTimeLine(models.Model):
@@ -43,7 +43,7 @@ class GeoArrayTimeLine(models.Model):
     date = models.DateTimeField()
 
     def __str__(self):
-        return "%s, %d" % (self.array.name, self.time_point)
+        return "<GeoArrayTimeLine array=%s, time_point=%d>" % (self.array.name, self.time_point)
 
 
 class GeoArrayDataFile(models.Model):
@@ -58,6 +58,6 @@ class GeoArrayTimeUnit(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
-        return self.name
+        return "<GeoArrayTimeUnit %s>" % self.name
 
 

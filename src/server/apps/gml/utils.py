@@ -8,5 +8,5 @@ namespace_gmlcov = Namespace("http://www.opengis.net/gmlcov/1.0", "gmlcov")
 namespace_set = NamespaceSet(namespace_gml, namespace_gmlcov)
 
 
-GML = ElementMaker(namespace=namespace_gml.uri, nsmap=namespace_set)
-GMLCOV = ElementMaker(namespace=namespace_gmlcov.uri, nsmap=namespace_set)
+GML_MAKER = ElementMaker(namespace=namespace_gml.uri, nsmap=namespace_set)
+GMLCOV_MAKER = ElementMaker(namespace=namespace_gmlcov.uri, nsmap=namespace_set)

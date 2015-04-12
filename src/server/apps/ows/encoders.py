@@ -1,14 +1,19 @@
 from base import XMLEncoder
 from utils import namespace_xlink, OWS_MAKER
+from exception import OWSException
+
+
+def encode_reference(node_name, href, reftype="simple"):
+    attributes = {namespace_xlink("href"): href}
+    if reftype:
+        attributes[namespace_xlink("type")] = reftype
+
+    return OWS_MAKER(node_name, **attributes)
 
 
 class OWSEncoder(XMLEncoder):
-    def encode_reference(self, node_name, href, reftype="simple"):
-        attributes = {namespace_xlink("href"): href}
-        if reftype:
-            attributes[namespace_xlink("type")] = reftype
-
-        return OWS_MAKER(node_name, **attributes)
+    def encode(self, request, url="http://127.0.0.1:8000/ows?"):
+        """ Must be implemented """
 
 
 class OWSExceptionResponse(XMLEncoder):

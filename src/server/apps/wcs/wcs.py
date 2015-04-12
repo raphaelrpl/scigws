@@ -3,7 +3,7 @@ from apps.ows.ows_old import OWSMeta
 from exception import throws_exception
 from apps.scidb.db import SciDB, scidbapi
 from exception import WCSException
-from utils import pretty_xml
+from utils import pretty_xml, WCS_MAKER
 from validators import DateToPoint
 from base import WCSBase
 from apps.swe.swe import SWEMeta
@@ -11,6 +11,32 @@ from validators import is_valid_url
 from apps.gml.gml import GMLMeta
 from datetime import datetime
 from apps.geo.models import GeoArrayTimeLine, GeoArray
+from apps.ows.utils import DBConfig
+
+
+class WCS(object):
+    def __init__(self, formats=[]):
+        self.root_coverages_summary = WCS_MAKER("Contents")
+        self.root_coverages_summary.extend([
+                WCS_MAKER(
+                    "CoverageSummary",
+                    WCS_MAKER(
+                        "CoverageId",
+                        coverage.name
+                    ),
+                    WCS_MAKER(
+                        "CoverageSubtype",
+                        "GridCoverage"
+                    )
+                )
+                for coverage in GeoArray.objects.all()
+            ])
+
+    def get_coverages_summary(self):
+        return self.root_coverages_summary
+
+    def _get_coverages_offered(self):
+        scidb = SciDB(**DBConfig().get_scidb_credentials)
 
 
 class GetCapabilities(WCSBase):
@@ -65,18 +91,24 @@ class GetCapabilities(WCSBase):
             raise WCSException("DB config is empty! \"%s\"" % self.config)
 
         # Check time series available in scidb, get metadata from postgres
-        results = GeoArrayTimeLine.objects.all()
+        results = list(GeoArrayTimeLine.objects.all())
+
+        extension = ElementTree.SubElement(self.contents, "{%s}Extension" % self.ns_dict['wcs'])
 
         for coverage in self.geo_arrays:
-            dataseries = ElementTree.SubElement(self.dom, "wcseo:DatasetSeriesSummary")
+            dataseries = ElementTree.SubElement(extension, "wcseo:DatasetSeriesSummary")
             dataid = ElementTree.SubElement(dataseries, "wcseo:DatasetSeriesId")
             dataid.text = str(self.geo_arrays[coverage].get('name'))
-            # time_period = ElementTree.SubElement(dataseries, "{%s}TimePeriod" % self.ns_dict['gml'])
-            temporal = ElementTree.SubElement(dataseries, "{%s}TemporalDomain" % self.ns_dict['wcs'])
-            for result in results:
-                if self.geo_arrays[coverage].get('name') == result.array.name:
-                    tree = ElementTree.SubElement(temporal, "{%s}timePosition" % self.ns_dict['gml'])
-                    tree.text = result.date.strftime("%Y-%m-%d")
+            time_period = ElementTree.SubElement(dataseries, "{%s}TimePeriod" % self.ns_dict['gml'], attrib={"gml:id": str(self.geo_arrays[coverage].get('name'))})
+            begin_position = ElementTree.SubElement(time_period, "{%s}beginPosition" % self.ns_dict['gml'])
+            begin_position.text = results[0].date.strftime("%Y-%m-%dT%H:%M:%S")
+            end_position = ElementTree.SubElement(time_period, "{%s}endPosition" % self.ns_dict['gml'])
+            end_position.text = results[-1].date.strftime("%Y-%m-%dT%H:%M:%S")
+            # temporal = ElementTree.SubElement(dataseries, "{%s}TemporalDomain" % self.ns_dict['wcs'])
+            # for result in results:
+            #     if self.geo_arrays[coverage].get('name') == result.array.name:
+            #         tree = ElementTree.SubElement(temporal, "{%s}timePosition" % self.ns_dict['gml'])
+            #         tree.text = result.date.strftime("%Y-%m-%d")
         return pretty_xml(self.dom), 200
 
 

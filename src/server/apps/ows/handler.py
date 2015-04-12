@@ -1,27 +1,28 @@
-from django.http.request import QueryDict
 from encoders import OWSExceptionResponse
+from apps.wcs.encoders import GetCapabilitiesEncoder
 
 
 class ServiceRequest(object):
     params = {}
 
     def __init__(self, params):
-        if isinstance(params, QueryDict):
+        if isinstance(params, dict):
             for key, value in params.iteritems():
-                params[key.lower()] = value.lower()
+                self.params[key.lower()] = value.lower()
 
-
-a = ServiceRequest({'NAME': "Abacate", 'service': "WCS"})
+    def __str__(self):
+        return "<ServiceRequest {}>".format(self.params)
+    
 
 
 class RequestHandler(object):
     @classmethod
     def handle(cls, request):
-        """ output xml """
         if request.method == "GET":
             service_request = ServiceRequest(request.GET)
         else:
             service_request = ServiceRequest(request.body)
+        return OWSFactory.factory(service_request.params)
 
 
 class OWSExceptionHandler(object):
@@ -36,3 +37,15 @@ class OWSExceptionHandler(object):
 
         return response.serialize(response.dispatch(message=message, version=version, code=code,
                                                     locator=locator)), response.content_type
+
+
+class OWSFactory(object):
+    @staticmethod
+    def factory(params):
+        if isinstance(params, dict):
+            service = params.get('service', "")
+            if service.lower() == "wcs":
+                return GetCapabilitiesEncoder()
+            elif service.lower() == "wms":
+                pass
+            raise OWSException("Invalid service name")  # fix this
