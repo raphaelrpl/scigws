@@ -1,6 +1,7 @@
 from apps.ows.encoders import OWSEncoder
 from apps.ows.utils import OWS_MAKER
 from apps.ows.ows import OWSMeta
+from apps.ows.exception import MissingParameterValue
 from utils import WCS_MAKER, wcs_set, WCSEO_MAKER
 from apps.wcs.wcs import WCS
 from apps.gml.utils import GML_MAKER
@@ -8,10 +9,15 @@ from apps.geo.models import GeoArrayTimeLine
 from collections import defaultdict
 
 
-class GetCapabilitiesEncoder(OWSEncoder):
+class WCSEncoder(OWSEncoder):
+    def __init__(self, params):
+        self.params = params
+
     def get_schema_locations(self):
         return wcs_set.schema_locations
 
+
+class GetCapabilitiesEncoder(WCSEncoder):
     def encode(self, request, url="http://127.0.0.1:8000/ows?"):
         nodes = []
         ows = OWSMeta()
@@ -66,5 +72,18 @@ class GetCapabilitiesEncoder(OWSEncoder):
 
         root = WCS_MAKER("Capabilities", *nodes, version="2.0.1")
 
+        return root
+
+
+class DescribeCoverageEncoder(WCSEncoder):
+    def __init__(self, params):
+        super(DescribeCoverageEncoder, self).__init__(params)
+        if not params.get('coverageid'):
+            raise MissingParameterValue("Missing parameter coverageID", locator="coverageID")
+
+    def encode(self, request, url="http://127.0.0.1:8000/ows?"):
+        nodes = []
+
+        root = WCS_MAKER("CoverageDescriptions", *nodes, version="2.0.1")
 
         return root

@@ -1,4 +1,5 @@
 from xml.etree import ElementTree
+from apps.ows.exception import OWSException
 
 
 def throws_exception(params):
@@ -31,6 +32,3 @@ class LocatorListException(Exception):
 
 class NoSuchCoverageException(LocatorListException):
     code = "NoSuchCoverageException"
-
-    def __str__(self):
-        return "No such Coverage%s w: %s" % ("" if len(self.errors) == 1 else "s", ", ".join([i for i in self.errors]))
