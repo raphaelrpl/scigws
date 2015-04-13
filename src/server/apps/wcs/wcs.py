@@ -9,34 +9,46 @@ from base import WCSBase
 from apps.swe.swe import SWEMeta
 from validators import is_valid_url
 from apps.gml.gml import GMLMeta
-from datetime import datetime
 from apps.geo.models import GeoArrayTimeLine, GeoArray
 from apps.ows.utils import DBConfig
+from collections import defaultdict
+from apps.ows.base import OWSDict
 
 
 class WCS(object):
     def __init__(self, formats=[]):
         self.root_coverages_summary = WCS_MAKER("Contents")
         self.root_coverages_summary.extend([
+            WCS_MAKER(
+                "CoverageSummary",
                 WCS_MAKER(
-                    "CoverageSummary",
-                    WCS_MAKER(
-                        "CoverageId",
-                        coverage.name
-                    ),
-                    WCS_MAKER(
-                        "CoverageSubtype",
-                        "GridCoverage"
-                    )
+                    "CoverageId",
+                    coverage.name
+                ),
+                WCS_MAKER(
+                    "CoverageSubtype",
+                    "GridCoverage"
                 )
-                for coverage in GeoArray.objects.all()
-            ])
+            )
+            for coverage in GeoArray.objects.all()
+        ])
+        times = GeoArrayTimeLine.objects.all().order_by('id')
+
+        self.times = defaultdict(list)
+        for time in times:
+            self.times[time.array].append(time)
 
     def get_coverages_summary(self):
         return self.root_coverages_summary
 
     def _get_coverages_offered(self):
-        scidb = SciDB(**DBConfig().get_scidb_credentials)
+        scidb = SciDB(**DBConfig().get_scidb_credentials())
+        print(scidb)
+        return
+
+    def describe_coverage(self, params):
+        pass
+
 
 
 class GetCapabilities(WCSBase):

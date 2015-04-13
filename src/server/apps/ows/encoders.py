@@ -12,7 +12,7 @@ def encode_reference(node_name, href, reftype="simple"):
 
 
 class OWSEncoder(XMLEncoder):
-    def encode(self, request, url="http://127.0.0.1:8000/ows?"):
+    def encode(self, request):
         """ Must be implemented """
 
 

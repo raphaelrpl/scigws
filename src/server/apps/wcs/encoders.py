@@ -18,9 +18,9 @@ class WCSEncoder(OWSEncoder):
 
 
 class GetCapabilitiesEncoder(WCSEncoder):
-    def encode(self, request, url="http://127.0.0.1:8000/ows?"):
+    def encode(self, request):
         nodes = []
-        ows = OWSMeta()
+        ows = OWSMeta(url=request.build_absolute_uri().split('?')[0] + "?")
 
         nodes.append(ows.root_identification)
         nodes.append(ows.root_provider)
@@ -34,13 +34,6 @@ class GetCapabilitiesEncoder(WCSEncoder):
 
         nodes.append(root_service_metadata)
 
-        times = GeoArrayTimeLine.objects.all().order_by('id')
-
-        output_dict = defaultdict(list)
-        for time in times:
-            output_dict[time.array.pk].append(time)
-
-
         wcseo_times = [
             WCSEO_MAKER(
                 "DatasetSeriesSummary",
@@ -48,16 +41,16 @@ class GetCapabilitiesEncoder(WCSEncoder):
                     "TimePeriod",
                     GML_MAKER(
                         "beginPosition",
-                        output_dict[geo_array][0].date.strftime("%Y-%m-%dT%H:%M:%S")
+                        wcs.times[geo_array][0].date.strftime("%Y-%m-%dT%H:%M:%S")
                     ),
                     GML_MAKER(
                         "endPosition",
-                        output_dict[geo_array][-1].date.strftime("%Y-%m-%dT%H:%M:%S")
+                        wcs.times[geo_array][-1].date.strftime("%Y-%m-%dT%H:%M:%S")
                     ),
-                    id=output_dict[geo_array][0].array.name
+                    id=wcs.times[geo_array][0].array.name
                 )
             )
-            for geo_array in output_dict
+            for geo_array in wcs.times
         ]
 
         extension = WCS_MAKER("Extension")
@@ -81,8 +74,34 @@ class DescribeCoverageEncoder(WCSEncoder):
         if not params.get('coverageid'):
             raise MissingParameterValue("Missing parameter coverageID", locator="coverageID")
 
-    def encode(self, request, url="http://127.0.0.1:8000/ows?"):
+    def encode(self, request):
         nodes = []
+
+        wcs = WCS()
+        wcs.describe_coverage(self.params)
+
+        coverages = []
+        for coverage in self.params.get('coverageid'):
+            coverage_description = WCS_MAKER(
+                "CoverageDescription",
+                WCS_MAKER(
+                    "boundedBy",
+                    WCS_MAKER(
+                        "Envelope",
+                        WCS_MAKER(
+                            "lowerCorner",
+
+                        ),
+                        WCS_MAKER(
+                            "upperCorner",
+
+                        ),
+                        axisLabels=""
+                    )
+                ),
+                id=coverage
+            )
+            coverages.append(coverage_description)
 
         root = WCS_MAKER("CoverageDescriptions", *nodes, version="2.0.1")
 
