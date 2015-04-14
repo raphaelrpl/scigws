@@ -11,17 +11,17 @@ from apps.ows.encoders import OWSEncoder
 
 class SimpleView(View):
     def process_request(self, request):
-        # code = 200
-        # try:
-        #     result = RequestHandler.handle(request)
-        # except Exception as e:
-        #     result, content_type = OWSExceptionHandler.handle(e)
-        #     code = 400
-        #
-        # if isinstance(result, str):
-        #     return HttpResponse(result, content_type=content_type, status=code)
-        #
-        # return HttpResponse(result.serialize(result.encode(request)), content_type=result.content_type, status=code)
+        code = 200
+        try:
+            result = RequestHandler.handle(request)
+        except Exception as e:
+            result, content_type = OWSExceptionHandler.handle(e)
+            code = 400
+
+        if isinstance(result, str):
+            return HttpResponse(result, content_type=content_type, status=code)
+
+        return HttpResponse(result.serialize(result.encode(request)), content_type=result.content_type, status=code)
 
 
         wcs_errors = {}

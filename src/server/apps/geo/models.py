@@ -23,6 +23,17 @@ class GeoArray(models.Model):
     def __str__(self):
         return "<GeoArray %s>" % self.name
 
+    def get_axis_labels(self):
+        return "%s %s %s" % (self.x_dim_name, self.y_dim_name, self.t_dim_name)
+
+    def get_lower(self):
+        return "%s %s %s" % (self.x_min, self.y_min, self.geoarraytimeline_set.all().aggregate(
+            time_point=models.Min('time_point')).get('time_point', 0))
+
+    def get_upper(self):
+        return "%s %s %s" % (self.x_max, self.y_max, self.geoarraytimeline_set.all().aggregate(
+            time_point=models.Max('time_point')).get('time_point', 0))
+
 
 class GeoArrayAttribute(models.Model):
     array = models.ForeignKey(GeoArray)

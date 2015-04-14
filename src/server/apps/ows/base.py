@@ -1,3 +1,4 @@
+from django.http.request import QueryDict
 from lxml import etree
 from utils import namespace_xsi
 from exception import InvalidParameterValue
@@ -26,11 +27,10 @@ class OWSDict(dict):
     _supported_operations = ["getcapabilities", "describecoverage", "getcoverage", "getmap", "getlayer"]
 
     def __init__(self, key_to_list_mapping):
-        if isinstance(key_to_list_mapping, dict):
-            key_to_list_mapping._mutable = True
-            to_iterate = key_to_list_mapping.copy()
+        if isinstance(key_to_list_mapping, QueryDict):
+            to_iterate, key_to_list_mapping = key_to_list_mapping, {}
             for key, value in to_iterate.iteritems():
-                key_to_list_mapping[key.lower()] = value.lower()
+                key_to_list_mapping[key.lower()] = [i.lower() for i in to_iterate.getlist(key)]
         super(OWSDict, self).__init__(key_to_list_mapping)
         self._is_valid_ows_request()
 
@@ -49,3 +49,23 @@ class OWSDict(dict):
         req = self.get('request', '')
         service = self.get('service', '')
         return req[0].lower(), service[0].lower() if req and service else None
+
+    def coverage_id_formatter(self):
+        coverages = self.get('coverageid', [])
+        if coverages:
+            del self['coverageid']
+            output = []
+            for coverage in coverages:
+                if ',' in coverage:
+                    for c in coverage.split(','):
+                        output.append(c)
+                else:
+                    output.append(coverage)
+            self['coverageid'] = output
+        print(self)
+
+
+class BaseHandler(object):
+    @classmethod
+    def handle(cls, handler, **kwargs):
+        """ It must be implemented """

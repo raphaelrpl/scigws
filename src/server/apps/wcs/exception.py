@@ -18,7 +18,10 @@ def throws_exception(params):
 
 
 class WCSException(Exception):
-    def __init__(self, msg):
+    code = None
+    locator = None
+
+    def __init__(self, msg, locator):
         super(WCSException, self).__init__(msg)
         self.msg = msg
 
@@ -30,5 +33,8 @@ class LocatorListException(Exception):
         self.errors = errors_list
 
 
-class NoSuchCoverageException(LocatorListException):
+class NoSuchCoverageException(WCSException):
     code = "NoSuchCoverageException"
+
+    def __init__(self, msg="Invalid coverage identifier", locator="coverageID"):
+        super(NoSuchCoverageException, self).__init__(msg, locator)

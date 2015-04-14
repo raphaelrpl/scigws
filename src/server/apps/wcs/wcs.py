@@ -1,5 +1,6 @@
 from xml.etree import ElementTree
 from apps.ows.ows_old import OWSMeta
+from django.core.exceptions import ObjectDoesNotExist
 from exception import throws_exception
 from apps.scidb.db import SciDB, scidbapi
 from exception import WCSException
@@ -13,6 +14,8 @@ from apps.geo.models import GeoArrayTimeLine, GeoArray
 from apps.ows.utils import DBConfig
 from collections import defaultdict
 from apps.ows.base import OWSDict
+from exception import NoSuchCoverageException
+from apps.ows.exception import MissingParameterValue
 
 
 class WCS(object):
@@ -47,8 +50,23 @@ class WCS(object):
         return
 
     def describe_coverage(self, params):
-        pass
+        coverages_ids = params.get('coverageid', [])
+        if not coverages_ids:
+            raise MissingParameterValue("Missing coverageID parameter", locator="coverageID")
+        coverages_ids = "".join(coverages_ids).split(",")
+        self.geo_arrays = GeoArray.objects.filter(name__in=coverages_ids)
+        return
 
+    def get_geo_array(self, array):
+        geo = None
+        for c in self.geo_arrays:
+            if c.name == array:
+                geo = c
+                break
+
+        if not geo:
+            raise NoSuchCoverageException()
+        return geo
 
 
 class GetCapabilities(WCSBase):

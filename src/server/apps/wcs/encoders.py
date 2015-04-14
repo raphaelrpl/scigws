@@ -81,7 +81,11 @@ class DescribeCoverageEncoder(WCSEncoder):
         wcs.describe_coverage(self.params)
 
         coverages = []
+        self.params.coverage_id_formatter()
+
         for coverage in self.params.get('coverageid'):
+
+            geo = wcs.get_geo_array(coverage)
             coverage_description = WCS_MAKER(
                 "CoverageDescription",
                 WCS_MAKER(
@@ -90,13 +94,13 @@ class DescribeCoverageEncoder(WCSEncoder):
                         "Envelope",
                         WCS_MAKER(
                             "lowerCorner",
-
+                            geo.get_lower()
                         ),
                         WCS_MAKER(
                             "upperCorner",
-
+                            geo.get_upper()
                         ),
-                        axisLabels=""
+                        axisLabels=geo.get_axis_labels()
                     )
                 ),
                 id=coverage
@@ -104,5 +108,6 @@ class DescribeCoverageEncoder(WCSEncoder):
             coverages.append(coverage_description)
 
         root = WCS_MAKER("CoverageDescriptions", *nodes, version="2.0.1")
+        root.extend(coverages)
 
         return root
