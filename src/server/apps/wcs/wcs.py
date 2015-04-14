@@ -55,7 +55,8 @@ class WCS(object):
             raise MissingParameterValue("Missing coverageID parameter", locator="coverageID")
         coverages_ids = "".join(coverages_ids).split(",")
         self.geo_arrays = GeoArray.objects.filter(name__in=coverages_ids)
-        return
+        if not self.geo_arrays:
+            raise NoSuchCoverageException()
 
     def get_geo_array(self, array):
         geo = None
@@ -65,7 +66,7 @@ class WCS(object):
                 break
 
         if not geo:
-            raise NoSuchCoverageException()
+            raise NoSuchCoverageException("No such coverage with ID %s" % array)
         return geo
 
 

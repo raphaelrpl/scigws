@@ -18,12 +18,13 @@ def throws_exception(params):
 
 
 class WCSException(Exception):
+    """ Base Exception """
     code = None
     locator = None
 
-    def __init__(self, msg, locator):
+    def __init__(self, msg, locator=None):
         super(WCSException, self).__init__(msg)
-        self.msg = msg
+        self.locator = locator
 
 
 class LocatorListException(Exception):

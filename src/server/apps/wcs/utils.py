@@ -17,6 +17,8 @@ WCS_MAKER = ElementMaker(namespace=namespace_wcs.uri, nsmap=wcs_set)
 
 WCSEO_MAKER = ElementMaker(namespace=namespace_wcseo.uri, nsmap=wcs_set)
 
+SWE_MAKER = ElementMaker(namespace=namespace_swe.uri, nsmap=wcs_set)
+
 
 def pretty_xml(element):
     xml_string = ElementTree.tostring(element)

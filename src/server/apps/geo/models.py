@@ -34,6 +34,10 @@ class GeoArray(models.Model):
         return "%s %s %s" % (self.x_max, self.y_max, self.geoarraytimeline_set.all().aggregate(
             time_point=models.Max('time_point')).get('time_point', 0))
 
+    def get_min_max_time(self):
+        return (self.geoarraytimeline_set.all().aggregate(date=models.Min('date')).get('date').strftime("%Y-%m-%dT%H:%M:%S"),
+                self.geoarraytimeline_set.all().aggregate(date=models.Max('date')).get('date').strftime("%Y-%m-%dT%H:%M:%S"))
+
 
 class GeoArrayAttribute(models.Model):
     array = models.ForeignKey(GeoArray)
@@ -47,6 +51,9 @@ class GeoArrayAttribute(models.Model):
     def __str__(self):
         return "<GeoArrayAttribute %s>" % self.name
 
+    def get_interval(self):
+        return "%s %s" % (self.range_min, self.range_max)
+
 
 class GeoArrayTimeLine(models.Model):
     array = models.ForeignKey(GeoArray)
@@ -54,7 +61,7 @@ class GeoArrayTimeLine(models.Model):
     date = models.DateTimeField()
 
     def __str__(self):
-        return "<GeoArrayTimeLine array=%s, time_point=%d>" % (self.array.name, self.time_point)
+        return "<GeoArrayTimeLine array=%s, time_point=%s>" % (self.array.name, self.time_point)
 
 
 class GeoArrayDataFile(models.Model):

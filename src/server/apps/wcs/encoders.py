@@ -1,12 +1,9 @@
 from apps.ows.encoders import OWSEncoder
-from apps.ows.utils import OWS_MAKER
 from apps.ows.ows import OWSMeta
 from apps.ows.exception import MissingParameterValue
-from utils import WCS_MAKER, wcs_set, WCSEO_MAKER
+from utils import WCS_MAKER, wcs_set, WCSEO_MAKER, SWE_MAKER
 from apps.wcs.wcs import WCS
-from apps.gml.utils import GML_MAKER
-from apps.geo.models import GeoArrayTimeLine
-from collections import defaultdict
+from apps.gml.utils import GML_MAKER, GMLCOV_MAKER
 
 
 class WCSEncoder(OWSEncoder):
@@ -70,9 +67,9 @@ class GetCapabilitiesEncoder(WCSEncoder):
 
 class DescribeCoverageEncoder(WCSEncoder):
     def __init__(self, params):
-        super(DescribeCoverageEncoder, self).__init__(params)
-        if not params.get('coverageid'):
+        if not params.get('coverageid', []):
             raise MissingParameterValue("Missing parameter coverageID", locator="coverageID")
+        super(DescribeCoverageEncoder, self).__init__(params)
 
     def encode(self, request):
         nodes = []
@@ -81,27 +78,74 @@ class DescribeCoverageEncoder(WCSEncoder):
         wcs.describe_coverage(self.params)
 
         coverages = []
-        self.params.coverage_id_formatter()
 
         for coverage in self.params.get('coverageid'):
-
             geo = wcs.get_geo_array(coverage)
+            time_periods = geo.get_min_max_time()
+            swe_datarecord = SWE_MAKER("DataRecord")
+            swe_fields = [
+                SWE_MAKER(
+                    "field",
+                    SWE_MAKER(
+                        "Quantity",
+                        SWE_MAKER("description", attr.description),
+                        SWE_MAKER("uom", "NVDI"),
+                        SWE_MAKER(
+                            "constraint",
+                            SWE_MAKER(
+                                "AllowedValues",
+                                SWE_MAKER("interval", attr.get_interval())
+                            )
+                        )
+                    ),
+                    name=attr.name
+                )
+                for attr in geo.geoarrayattribute_set.all()
+            ]
+            swe_datarecord.extend(swe_fields)
             coverage_description = WCS_MAKER(
                 "CoverageDescription",
-                WCS_MAKER(
+                GML_MAKER(
                     "boundedBy",
-                    WCS_MAKER(
+                    GML_MAKER(
                         "Envelope",
-                        WCS_MAKER(
+                        GML_MAKER(
                             "lowerCorner",
                             geo.get_lower()
                         ),
-                        WCS_MAKER(
+                        GML_MAKER(
                             "upperCorner",
                             geo.get_upper()
                         ),
-                        axisLabels=geo.get_axis_labels()
+                        axisLabels=geo.get_axis_labels(),
+                        srsDimension="3",
+                        srsName="http://www.opengis.net/def/crs/EPSG/0/4326"
                     )
+                ),
+                WCS_MAKER("CoverageId", geo.name),
+                GML_MAKER(
+                    "domainSet",
+                    GML_MAKER(
+                        "Grid",
+                        GML_MAKER(
+                            "limits",
+                            GML_MAKER(
+                                "GridEnvelope",
+                                GML_MAKER("low", geo.get_lower()),
+                                GML_MAKER("high", geo.get_upper())
+                            )
+                        ),
+                        dimension="3"
+                    )
+                ),
+                GML_MAKER(
+                    "TimePeriod",
+                    GML_MAKER("beginPosition", time_periods[0]),
+                    GML_MAKER("endPosition", time_periods[-1])
+                ),
+                GMLCOV_MAKER(
+                    "rangeType",
+                    swe_datarecord
                 ),
                 id=coverage
             )

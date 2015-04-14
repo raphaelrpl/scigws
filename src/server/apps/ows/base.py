@@ -33,6 +33,7 @@ class OWSDict(dict):
                 key_to_list_mapping[key.lower()] = [i.lower() for i in to_iterate.getlist(key)]
         super(OWSDict, self).__init__(key_to_list_mapping)
         self._is_valid_ows_request()
+        self.coverage_id_formatter()
 
     def _is_valid_ows_request(self):
         service = self.get('service', ' ')
@@ -51,7 +52,7 @@ class OWSDict(dict):
         return req[0].lower(), service[0].lower() if req and service else None
 
     def coverage_id_formatter(self):
-        coverages = self.get('coverageid', [])
+        coverages = filter(bool, self.get('coverageid', []))
         if coverages:
             del self['coverageid']
             output = []
@@ -62,7 +63,9 @@ class OWSDict(dict):
                 else:
                     output.append(coverage)
             self['coverageid'] = output
-        print(self)
+            return
+        if "coverageid" in self.keys():
+            raise InvalidParameterValue("Invalid coverage identifier", locator="coverageID")
 
 
 class BaseHandler(object):
