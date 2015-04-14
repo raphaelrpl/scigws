@@ -1,6 +1,6 @@
 from xml.etree import ElementTree
 from exception import OWSException
-from utils import Identification, OWS_MAKER
+from utils import Identification, OWS_MAKER, namespace_xlink
 from encoders import encode_reference
 
 
@@ -32,9 +32,9 @@ class OWSMeta(object):
         self.root_provider = OWS_MAKER(
             "ServiceProvider",
             OWS_MAKER("ProviderName", provider.get('name')),
-            OWS_MAKER("ProviderSite", provider.get('site')),
+            OWS_MAKER("ProviderSite", **{namespace_xlink('href'): provider.get('site')}),
             OWS_MAKER(
-                "Contact",
+                "ServiceContact",
                 OWS_MAKER(
                     "IndividualName", contact.get('individual_name')),
                 OWS_MAKER(

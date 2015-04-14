@@ -11,6 +11,10 @@ def encode_reference(node_name, href, reftype="simple"):
     return OWS_MAKER(node_name, **attributes)
 
 
+def encode_namespace(namespace, tag, value):
+    return {namespace(tag): value}
+
+
 class OWSEncoder(XMLEncoder):
     def encode(self, request):
         """ Must be implemented """

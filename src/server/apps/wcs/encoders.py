@@ -3,7 +3,7 @@ from apps.ows.ows import OWSMeta
 from apps.ows.exception import MissingParameterValue
 from utils import WCS_MAKER, wcs_set, WCSEO_MAKER, SWE_MAKER
 from apps.wcs.wcs import WCS
-from apps.gml.utils import GML_MAKER, GMLCOV_MAKER
+from apps.gml.utils import GML_MAKER, GMLCOV_MAKER, namespace_gml
 
 
 class WCSEncoder(OWSEncoder):
@@ -34,6 +34,7 @@ class GetCapabilitiesEncoder(WCSEncoder):
         wcseo_times = [
             WCSEO_MAKER(
                 "DatasetSeriesSummary",
+                WCSEO_MAKER("DatasetSeriesId", geo_array.name),
                 GML_MAKER(
                     "TimePeriod",
                     GML_MAKER(
@@ -44,7 +45,7 @@ class GetCapabilitiesEncoder(WCSEncoder):
                         "endPosition",
                         wcs.times[geo_array][-1].date.strftime("%Y-%m-%dT%H:%M:%S")
                     ),
-                    id=wcs.times[geo_array][0].array.name
+                    **{namespace_gml('id'): geo_array.name}
                 )
             )
             for geo_array in wcs.times
