@@ -32,7 +32,12 @@ class WCSFactory(object):
     @staticmethod
     def factory(params):
         request = params.get('request', [])[0]
-
+        if request == "getcapabilities":
+            return GetCapabilitiesEncoder(params)
+        if request == "describecoverage":
+            return DescribeCoverageEncoder(params)
+        if request == "getcoverage":
+            pass
         raise InvalidParameterValue("Invalid request name", locator="request")
 
 
@@ -48,14 +53,7 @@ class OWSFactory(object):
         if isinstance(params, OWSDict):
             request, service = params.get_ows_request()
             if service == "wcs":
-                # return WCSFactory.factory(params)
-                if request == "getcapabilities":
-                    return GetCapabilitiesEncoder(params)
-                if request == "describecoverage":
-                    return DescribeCoverageEncoder(params)
-                if request == "getcoverage":
-                    pass
-                raise InvalidParameterValue("Invalid request name", locator="request")
-            elif params.get_ows_request() == "wms":
                 return WCSFactory.factory(params)
+            elif params.get_ows_request() == "wms":
+                return WMSFactory.factory(params)
             raise InvalidParameterValue("Invalid service name", locator="service")  # fix this
