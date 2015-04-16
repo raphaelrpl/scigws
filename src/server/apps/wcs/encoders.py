@@ -164,7 +164,6 @@ class GetCoverageEncoder(WCSEncoder):
         wcs = WCS()
         wcs.get_coverage(self.params)
         geo = wcs.get_geo_array()
-        print(geo)
         bounded_by = GML_MAKER(
             "boundedBy",
             GML_MAKER(
@@ -182,6 +181,55 @@ class GetCoverageEncoder(WCSEncoder):
                 srsName="http://www.opengis.net/def/crs/EPSG/0/4326"
             )
         )
+
+        nodes.append(bounded_by)
+
+        domain_set = GML_MAKER(
+            "domainSet",
+            GML_MAKER(
+                "Grid",
+                GML_MAKER(
+                    "limits",
+                    GML_MAKER(
+                        "GridEnvelope",
+                        GML_MAKER(
+                            "low",
+                            geo.get_lower()
+                        ),
+                        GML_MAKER(
+                            "high",
+                            geo.get_upper()
+                        ),
+                    )
+                ),
+                dimension="3"
+            )
+        )
+
+        nodes.append(domain_set)
+
+        # SciDB data
+        time_series = ""
+        for i in range(len(wcs.data.values()[0])):
+            for attr_dict in geo.geoarrayattribute_set.all():
+                time_series += "%i " % wcs.data[attr_dict.name][i]
+            time_series = time_series.rstrip(" ") + ","
+        time_series = time_series.rstrip(',')
+
+        range_set = GML_MAKER(
+            "rangeSet",
+            GML_MAKER(
+                "DataBlock",
+                GML_MAKER(
+                    "tupleList",
+                    time_series,
+                    cs=" ",
+                    ts=","
+                )
+            )
+        )
+
+        nodes.append(range_set)
 
         swe_datarecord = SWE_MAKER("DataRecord")
         swe_fields = [
@@ -207,7 +255,6 @@ class GetCoverageEncoder(WCSEncoder):
 
         range_type = GMLCOV_MAKER("rangeType", swe_datarecord)
 
-        nodes.append(bounded_by)
         nodes.append(range_type)
 
         root = GMLCOV_MAKER("GridCoverage", *nodes, version="2.0.1")

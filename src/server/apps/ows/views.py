@@ -6,19 +6,18 @@ from utils import DBConfig
 from apps.scidb.db import SciDB, scidbapi
 from apps.geo.models import GeoArray
 from handler import RequestHandler, OWSExceptionHandler
-from apps.ows.encoders import OWSEncoder
 
 
 class SimpleView(View):
     def process_request(self, request):
-        # code = 200
-        # try:
-        #     result = RequestHandler.handle(request)
-        #     return HttpResponse(result.serialize(result.encode(request)), content_type=result.content_type, status=code)
-        # except Exception as e:
-        #     result, content_type = OWSExceptionHandler.handle(e)
-        #     code = 400
-        #     return HttpResponse(result, content_type=content_type, status=code)
+        code = 200
+        try:
+            result = RequestHandler.handle(request)
+            return HttpResponse(result.serialize(result.encode(request)), content_type=result.content_type, status=code)
+        except Exception as e:
+            result, content_type = OWSExceptionHandler.handle(e)
+            code = 400
+            return HttpResponse(result, content_type=content_type, status=code)
 
         wcs_errors = {}
         service = request.GET.get('service', '') or request.GET.get('SERVICE')
@@ -53,12 +52,6 @@ class SimpleView(View):
                                 del value_iterator
                             scidb_connection.disconnect()
                             if params['request'].lower() == "getcapabilities" or not req:
-
-                                from apps.wcs.encoders import GetCapabilitiesEncoder
-
-                                # c = GetCapabilitiesEncoder()
-                                # return HttpResponse(c.serialize(c.encode(request)), content_type=c.content_type)
-
                                 capabilities = GetCapabilities("http://%s?" % (
                                     request.get_host()+request.path), coverages_offered=coverages_offered)
                                 xml_output, code = capabilities.get_capabilities()

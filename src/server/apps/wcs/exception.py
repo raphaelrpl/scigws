@@ -39,3 +39,15 @@ class NoSuchCoverageException(WCSException):
 
     def __init__(self, msg="Invalid coverage identifier", locator="coverageID"):
         super(NoSuchCoverageException, self).__init__(msg, locator)
+
+
+class InvalidSubset(WCSException):
+    code = "InvalidSubsetting"
+    locator = "subset"
+
+    def __init__(self, msg="Invalid subset", locator="subset"):
+        super(InvalidSubset, self).__init__(msg, locator)
+
+
+class InvalidAxisLabel(WCSException):
+    code = "InvalidAxisLabel"
