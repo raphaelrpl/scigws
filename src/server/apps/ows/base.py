@@ -72,3 +72,8 @@ class BaseHandler(object):
     @classmethod
     def handle(cls, handler, **kwargs):
         """ It must be implemented """
+
+
+class BaseFactory(object):
+    def factory(params):
+        """ It must be implemented """

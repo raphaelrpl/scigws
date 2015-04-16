@@ -156,3 +156,59 @@ class DescribeCoverageEncoder(WCSEncoder):
         root.extend(coverages)
 
         return root
+
+
+class GetCoverageEncoder(WCSEncoder):
+    def encode(self, request):
+        nodes = []
+        wcs = WCS()
+        wcs.get_coverage(self.params)
+        geo = wcs.get_geo_array()
+        print(geo)
+        bounded_by = GML_MAKER(
+            "boundedBy",
+            GML_MAKER(
+                "Envelope",
+                GML_MAKER(
+                    "lowerCorner",
+                    geo.get_lower()
+                ),
+                GML_MAKER(
+                    "upperCorner",
+                    geo.get_upper()
+                ),
+                axisLabels=geo.get_axis_labels(),
+                srsDimension="3",
+                srsName="http://www.opengis.net/def/crs/EPSG/0/4326"
+            )
+        )
+
+        swe_datarecord = SWE_MAKER("DataRecord")
+        swe_fields = [
+            SWE_MAKER(
+                "field",
+                SWE_MAKER(
+                    "Quantity",
+                    SWE_MAKER("description", attr.description),
+                    SWE_MAKER("uom", "NVDI"),
+                    SWE_MAKER(
+                        "constraint",
+                        SWE_MAKER(
+                            "AllowedValues",
+                            SWE_MAKER("interval", attr.get_interval())
+                        )
+                    )
+                ),
+                name=attr.name
+            )
+            for attr in geo.geoarrayattribute_set.all()
+        ]
+        swe_datarecord.extend(swe_fields)
+
+        range_type = GMLCOV_MAKER("rangeType", swe_datarecord)
+
+        nodes.append(bounded_by)
+        nodes.append(range_type)
+
+        root = GMLCOV_MAKER("GridCoverage", *nodes, version="2.0.1")
+        return root

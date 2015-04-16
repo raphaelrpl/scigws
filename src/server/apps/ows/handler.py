@@ -1,6 +1,6 @@
 from encoders import OWSExceptionResponse
 from exception import InvalidParameterValue
-from apps.wcs.encoders import GetCapabilitiesEncoder, DescribeCoverageEncoder
+from apps.wcs.encoders import GetCapabilitiesEncoder, DescribeCoverageEncoder, GetCoverageEncoder
 from base import OWSDict
 
 
@@ -37,7 +37,7 @@ class WCSFactory(object):
         if request == "describecoverage":
             return DescribeCoverageEncoder(params)
         if request == "getcoverage":
-            pass
+            return GetCoverageEncoder(params)
         raise InvalidParameterValue("Invalid request name", locator="request")
 
 

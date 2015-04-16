@@ -15,7 +15,7 @@ from apps.ows.utils import DBConfig
 from collections import defaultdict
 from apps.ows.base import OWSDict
 from exception import NoSuchCoverageException
-from apps.ows.exception import MissingParameterValue
+from apps.ows.exception import MissingParameterValue, InvalidParameterValue
 
 
 class WCS(object):
@@ -58,13 +58,26 @@ class WCS(object):
         if not self.geo_arrays:
             raise NoSuchCoverageException()
 
-    def get_geo_array(self, array):
-        geo = None
-        for c in self.geo_arrays:
-            if c.name == array:
-                geo = c
-                break
+    def get_coverage(self, params):
+        coverage_id = params.get('coverageid', [])
+        if not coverage_id:
+            raise MissingParameterValue("Missing coverageID parameter", locator="coverageID")
+        if len(coverage_id) > 1:
+            raise InvalidParameterValue("Invalid coverage with id \"%s\"" % "".join(coverage_id), locator="coverageID")
+        try:
+            self.geo_array = GeoArray.objects.get(name=coverage_id[0])
+        except ObjectDoesNotExist:
+            raise NoSuchCoverageException()
 
+    def get_geo_array(self, array=None):
+        geo = None
+        if array:
+            for c in self.geo_arrays:
+                if c.name == array:
+                    geo = c
+                    break
+        else:
+            geo = self.geo_array
         if not geo:
             raise NoSuchCoverageException("No such coverage with ID %s" % array)
         return geo
