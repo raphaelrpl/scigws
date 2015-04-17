@@ -31,14 +31,14 @@ class OWSExceptionHandler(object):
 class WCSFactory(object):
     @staticmethod
     def factory(params):
-        request = params.get('request', [])[0]
+        request = params.get('request', [''])[0]
         if request == "getcapabilities":
             return GetCapabilitiesEncoder(params)
         if request == "describecoverage":
             return DescribeCoverageEncoder(params)
         if request == "getcoverage":
             return GetCoverageEncoder(params)
-        raise InvalidParameterValue("Invalid request name", locator="request")
+        raise InvalidParameterValue("Invalid request name \"%s\"" % request, locator="request")
 
 
 class WMSFactory(object):
@@ -56,4 +56,5 @@ class OWSFactory(object):
                 return WCSFactory.factory(params)
             elif params.get_ows_request() == "wms":
                 return WMSFactory.factory(params)
-            raise InvalidParameterValue("Invalid service name", locator="service")  # fix this
+            raise InvalidParameterValue("Invalid service name", locator="service")
+        raise InvalidParameterValue("Invalid request name")

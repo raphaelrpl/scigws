@@ -1,7 +1,8 @@
 from apps.ows.encoders import OWSEncoder
 from apps.ows.ows import OWSMeta
 from apps.ows.exception import MissingParameterValue
-from utils import WCS_MAKER, wcs_set, WCSEO_MAKER, SWE_MAKER
+from apps.swe.swe import SWEMeta
+from utils import WCS_MAKER, wcs_set, WCSEO_MAKER
 from apps.wcs.wcs import WCS
 from apps.gml.utils import GML_MAKER, GMLCOV_MAKER, namespace_gml
 
@@ -83,27 +84,6 @@ class DescribeCoverageEncoder(WCSEncoder):
         for coverage in self.params.get('coverageid'):
             geo = wcs.get_geo_array(coverage)
             time_periods = geo.get_min_max_time()
-            swe_datarecord = SWE_MAKER("DataRecord")
-            swe_fields = [
-                SWE_MAKER(
-                    "field",
-                    SWE_MAKER(
-                        "Quantity",
-                        SWE_MAKER("description", attr.description),
-                        SWE_MAKER("uom", "NVDI"),
-                        SWE_MAKER(
-                            "constraint",
-                            SWE_MAKER(
-                                "AllowedValues",
-                                SWE_MAKER("interval", attr.get_interval())
-                            )
-                        )
-                    ),
-                    name=attr.name
-                )
-                for attr in geo.geoarrayattribute_set.all()
-            ]
-            swe_datarecord.extend(swe_fields)
             coverage_description = WCS_MAKER(
                 "CoverageDescription",
                 GML_MAKER(
@@ -146,7 +126,7 @@ class DescribeCoverageEncoder(WCSEncoder):
                 ),
                 GMLCOV_MAKER(
                     "rangeType",
-                    swe_datarecord
+                    SWEMeta.get_data_record(geo)
                 ),
                 id=coverage
             )
@@ -231,29 +211,7 @@ class GetCoverageEncoder(WCSEncoder):
 
         nodes.append(range_set)
 
-        swe_datarecord = SWE_MAKER("DataRecord")
-        swe_fields = [
-            SWE_MAKER(
-                "field",
-                SWE_MAKER(
-                    "Quantity",
-                    SWE_MAKER("description", attr.description),
-                    SWE_MAKER("uom", "NVDI"),
-                    SWE_MAKER(
-                        "constraint",
-                        SWE_MAKER(
-                            "AllowedValues",
-                            SWE_MAKER("interval", attr.get_interval())
-                        )
-                    )
-                ),
-                name=attr.name
-            )
-            for attr in geo.geoarrayattribute_set.all()
-        ]
-        swe_datarecord.extend(swe_fields)
-
-        range_type = GMLCOV_MAKER("rangeType", swe_datarecord)
+        range_type = GMLCOV_MAKER("rangeType", SWEMeta.get_data_record(geo))
 
         nodes.append(range_type)
 

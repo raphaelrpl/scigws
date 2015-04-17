@@ -10,4 +10,4 @@ namespace_wcseo = Namespace("http://www.opengis.net/wcseo/1.0", "wcseo",
 
 swe_set = NamespaceSet(namespace_wcs, namespace_swe, namespace_ows, namespace_gml, namespace_gmlcov, namespace_wcseo)
 
-SWE_MAKER = ElementMaker(namespace=namespace_swe.uri, nsmap=wcs_set)
+SWE_MAKER = ElementMaker(namespace=namespace_swe.uri, nsmap=swe_set)
