@@ -1,16 +1,17 @@
-from django.core.management.base import BaseCommand, CommandError, make_option
+from django.core.management.base import BaseCommand, CommandError
 from apps.scidb.db import SciDB
 from apps.scidb.exception import SciDBConnectionError
 from json import loads
 
 
 class Command(BaseCommand):
-    help = 'A command for init test data on SciDB'
-    option_list = BaseCommand.option_list + (
-        make_option('--host', action='store_true', dest='host', default="localhost",
-                    help="Type SciDB host: default is localhost"),
-        make_option('--port', action='store_true', dest='port', default=1239,
-                    help="Type SciDB port: default is 1239"),)
+    help = 'Closes the specified poll for voting'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--host', action='store_true', dest='host', default="localhost",
+                            help='Type SciDB host: default is localhost')
+        parser.add_argument('--port', action='store_true', dest='port', default=1239,
+                            help='Type SciDB host: default is localhost')
 
     def handle(self, *args, **options):
         host = options.get('host')
