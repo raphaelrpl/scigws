@@ -119,8 +119,8 @@ class WCS(object):
             self.geo_array = GeoArray.objects.get(name=coverage_id[0])
             subset_list = params.get('subset', [])
             subset = self._get_subset_from(subset_list)
-            col_id = subset.get('col_id', {}).get('dimension', self.geo_array.get_x_dimension())
-            row_id = subset.get('row_id', {}).get('dimension', self.geo_array.get_y_dimension())
+            self.col_id = subset.get('col_id', {}).get('dimension', self.geo_array.get_x_dimension())
+            self.row_id = subset.get('row_id', {}).get('dimension', self.geo_array.get_y_dimension())
             time_id = subset.get('time_id', {}).get('dimension', self.geo_array.get_min_max_time())
             times_day_year = [DateToPoint.format_to_day_of_year(d) for d in time_id]
 
@@ -131,10 +131,11 @@ class WCS(object):
                                     startyear=int(start_date[:4]),
                                     startday=int(DateToPoint.format_to_day_of_year(start_date)[4:]))
 
-            time_id = [validator(t) for t in times_day_year]
+            self.time_id = [validator(t) for t in times_day_year]
 
-            afl = "subarray(%s, %s, %s, %s, %s, %s, %s)" % (self.geo_array.name, col_id[0], row_id[0], time_id[0],
-                                                            col_id[1], row_id[1], time_id[1])
+            afl = "subarray(%s, %s, %s, %s, %s, %s, %s)" % (self.geo_array.name, self.col_id[0], self.row_id[0],
+                                                            self.time_id[0], self.col_id[1], self.row_id[1],
+                                                            self.time_id[1])
 
             # Get SciDB data - Time series
             self.data = self.get_scidb_data(afl)

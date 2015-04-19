@@ -32,12 +32,12 @@ class GeoArray(models.Model):
     def get_y_dimension(self):
         return [self.y_min, self.y_max]
 
-    def get_lower(self):
-        return "%s %s %s" % (self.x_min, self.y_min, self.geoarraytimeline_set.all().aggregate(
+    def get_lower(self, xmin=None, ymin=None, tmin=None):
+        return "%s %s %s" % (xmin or self.x_min, ymin or self.y_min, tmin or self.geoarraytimeline_set.all().aggregate(
             time_point=models.Min('time_point')).get('time_point', 0))
 
-    def get_upper(self):
-        return "%s %s %s" % (self.x_max, self.y_max, self.geoarraytimeline_set.all().aggregate(
+    def get_upper(self, xmax=None, ymax=None, tmax=None):
+        return "%s %s %s" % (xmax or self.x_max, ymax or self.y_max, tmax or self.geoarraytimeline_set.all().aggregate(
             time_point=models.Max('time_point')).get('time_point', 0))
 
     def get_min_max_time(self):
