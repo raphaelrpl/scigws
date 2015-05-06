@@ -1,7 +1,7 @@
 from encoders import OWSExceptionResponse
 from exception import InvalidParameterValue
 from apps.wcs.encoders import GetCapabilitiesEncoder, DescribeCoverageEncoder, GetCoverageEncoder
-from base import OWSDict
+from base import OWSDict, BaseFactory
 
 
 class RequestHandler(object):
@@ -28,7 +28,7 @@ class OWSExceptionHandler(object):
                                                     locator=locator)), response.content_type
 
 
-class WCSFactory(object):
+class WCSFactory(BaseFactory):
     @staticmethod
     def factory(params):
         request = params.get('request', [''])[0]
@@ -41,13 +41,13 @@ class WCSFactory(object):
         raise InvalidParameterValue("Invalid request name \"%s\"" % request, locator="request")
 
 
-class WMSFactory(object):
+class WMSFactory(BaseFactory):
     @staticmethod
     def factory(params):
         return
 
 
-class OWSFactory(object):
+class OWSFactory(BaseFactory):
     @staticmethod
     def factory(params):
         if isinstance(params, OWSDict):

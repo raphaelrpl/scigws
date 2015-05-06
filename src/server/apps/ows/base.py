@@ -31,8 +31,11 @@ class OWSDict(dict):
             to_iterate, key_to_list_mapping = key_to_list_mapping, {}
             for key, value in to_iterate.iteritems():
                 key_to_list_mapping[key.lower()] = [i.lower() for i in to_iterate.getlist(key)]
-        if isinstance(key_to_list_mapping, str):
+        if isinstance(key_to_list_mapping, basestring):
             # TODO: XML Request
+            # import xmltodict
+            # data = xmltodict.parse(key_to_list_mapping)
+            # TODO: Validate data
             pass
         super(OWSDict, self).__init__(key_to_list_mapping)
         self._is_valid_ows_request()

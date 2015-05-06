@@ -138,6 +138,26 @@ class WCS(object):
 
             # Get SciDB data - Time series
             self.data = self.get_scidb_data(afl)
+            # from PIL import Image
+            # import numpy as np
+            # rgbArray = np.zeros((512, 512, 3), 'uint8')
+            # cont = 0
+            # for e in self.data['b1']:
+            #     rgbArray[cont, 0] = e*255
+            #     cont += 1
+            # # rgbArray[..., 0] = r*256
+            # cont = 0
+            # for e in self.data['b2']:
+            #     rgbArray[cont, 1] = e*255
+            #     cont += 1
+            # # rgbArray[..., 1] = g*256
+            # cont = 0
+            # for e in self.data['b3']:
+            #     rgbArray[cont, 2] = e*255
+            #     cont += 1
+            # # rgbArray[..., 2] = b*256
+            # img = Image.fromarray(rgbArray)
+            # img.save('myimg.jpeg')
 
         except ObjectDoesNotExist:
             raise NoSuchCoverageException()
