@@ -143,6 +143,9 @@ class GetCoverageEncoder(WCSEncoder):
         nodes = []
         wcs = WCS()
         wcs.get_coverage(self.params)
+        col_id = wcs.col_id
+        row_id = wcs.row_id
+        time_id = wcs.time_id
         geo = wcs.get_geo_array()
         bounded_by = GML_MAKER(
             "boundedBy",
@@ -150,11 +153,11 @@ class GetCoverageEncoder(WCSEncoder):
                 "Envelope",
                 GML_MAKER(
                     "lowerCorner",
-                    geo.get_lower()
+                    geo.get_lower(xmin=col_id[0], ymin=row_id[0], tmin=time_id[0])
                 ),
                 GML_MAKER(
                     "upperCorner",
-                    geo.get_upper()
+                    geo.get_upper(xmax=col_id[1], ymax=row_id[1], tmax=time_id[1])
                 ),
                 axisLabels=geo.get_axis_labels(),
                 srsDimension="3",
