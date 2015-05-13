@@ -24,10 +24,11 @@ class OWSMeta(object):
             OWS_MAKER("Abstract", identification.get('abstract')),
             OWS_MAKER("ServiceType", identification.get('service_type')),
             OWS_MAKER("ServiceTypeVersion", identification.get('service_type_version')),
-            OWS_MAKER("Profile", "http://www.opengis.net/spec/WCS_protocol-binding_s"),
-            OWS_MAKER("Profile", "http://www.opengis.net/spec/WCS_protocol-binding_get-kvp/1.0/conf/get-kvp"),
-            OWS_MAKER("Profile", "http://www.opengis.net/spec/WCS_geotiff-coverages/1.0/conf/geotiff-coverage"),
         )
+
+        profile_list = [OWS_MAKER("Profile", p.get('name')) for p in profiles]
+
+        self.root_identification.extend(profile_list)
 
         self.root_provider = OWS_MAKER(
             "ServiceProvider",
