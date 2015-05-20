@@ -194,8 +194,8 @@ class GetCoverageEncoder(WCSEncoder):
         # SciDB data
         time_series = ""
         for i in range(len(wcs.data.values()[0])):
-            for attr_dict in geo.geoarrayattribute_set.all():
-                time_series += "%i " % wcs.data[attr_dict.name][i]
+            for attr_dict in wcs.bands_input:
+                time_series += " %i" % wcs.data[attr_dict][i]
             time_series = time_series.rstrip(" ") + ","
         time_series = time_series.rstrip(',')
 

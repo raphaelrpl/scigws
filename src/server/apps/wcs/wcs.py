@@ -1,7 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from apps.scidb.db import SciDB, scidbapi
 from apps.scidb.exception import SciDBConnectionError
-from exception import NoSuchCoverageException, InvalidSubset, InvalidAxisLabel
+from exception import NoSuchCoverageException, InvalidSubset, InvalidAxisLabel, InvalidRangeSubSet, WCSException
 from utils import WCS_MAKER
 from validators import DateToPoint
 from validators import is_valid_url
@@ -14,6 +14,7 @@ from apps.ows.exception import MissingParameterValue, InvalidParameterValue
 class WCS(object):
     geo_array = None
     data = {}
+    bands_input = None
 
     def __init__(self, formats=[]):
         self.root_coverages_summary = WCS_MAKER("Contents")
@@ -67,6 +68,16 @@ class WCS(object):
                 raise InvalidAxisLabel("\"%s\" is not valid axis. " % sub, locator="subset")
         return params
 
+    def _get_bands_from(self, bands):
+        if isinstance(bands, list):
+            bands = bands[0]
+        temp = filter(lambda b: b.replace(' ', ''), bands.split(','))
+        geo_attr = self.geo_array.geoarrayattribute_set.filter(name__in=temp)
+        if len(temp) == len(geo_attr):
+            self.bands_input = temp
+            return temp
+        raise InvalidRangeSubSet(msg="Invalid rangesubset %s" % temp)
+
     @classmethod
     def get_scidb_data(cls, query, lang="AFL"):
         connection = SciDB(**DBConfig().get_scidb_credentials())
@@ -117,6 +128,7 @@ class WCS(object):
             raise InvalidParameterValue("Invalid coverage with id \"%s\"" % "".join(coverage_id), locator="coverageID")
         try:
             self.geo_array = GeoArray.objects.get(name=coverage_id[0])
+            self.bands_input = [band.name for band in self.geo_array.geoarrayattribute_set.all()]
             subset_list = params.get('subset', [])
             subset = self._get_subset_from(subset_list)
             self.col_id = subset.get('col_id', {}).get('dimension', self.geo_array.get_x_dimension())
@@ -138,28 +150,13 @@ class WCS(object):
                                                             self.time_id[1])
 
             # Get SciDB data - Time series
-            self.data = self.get_scidb_data(afl)
-            # from PIL import Image
-            # import numpy as np
-            # rgbArray = np.zeros((512, 512, 3), 'uint8')
-            # cont = 0
-            # for e in self.data['b1']:
-            #     rgbArray[cont, 0] = e*255
-            #     cont += 1
-            # # rgbArray[..., 0] = r*256
-            # cont = 0
-            # for e in self.data['b2']:
-            #     rgbArray[cont, 1] = e*255
-            #     cont += 1
-            # # rgbArray[..., 1] = g*256
-            # cont = 0
-            # for e in self.data['b3']:
-            #     rgbArray[cont, 2] = e*255
-            #     cont += 1
-            # # rgbArray[..., 2] = b*256
-            # img = Image.fromarray(rgbArray)
-            # img.save('myimg.jpeg')
-
+            bands = params.get('rangesubset', [])
+            if bands:
+                bands = self._get_bands_from(bands)
+            data = self.get_scidb_data(afl)
+            if data and bands:
+                data = {k: v for k, v in data.items() if k in bands}
+            self.data = data
         except ObjectDoesNotExist:
             raise NoSuchCoverageException()
         except ValueError as e:
@@ -168,9 +165,11 @@ class WCS(object):
             raise e
         except SciDBConnectionError as e:
             raise e
+        except InvalidRangeSubSet as e:
+            raise e
         except Exception as e:
             print(e)
-            raise InvalidSubset()
+            raise WCSException(e, locator="request")
 
     def get_geo_array(self, array=None):
         geo = None

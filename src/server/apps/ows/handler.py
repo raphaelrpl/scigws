@@ -57,4 +57,4 @@ class OWSFactory(BaseFactory):
             elif params.get_ows_request() == "wms":
                 return WMSFactory.factory(params)
             raise InvalidParameterValue("Invalid service name", locator="service")
-        raise InvalidParameterValue("Invalid request name")
+        raise InvalidParameterValue("Invalid request name", locator="request")
