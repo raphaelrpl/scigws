@@ -18,12 +18,15 @@
 
 from xml.etree import ElementTree
 import psycopg2
+from apps.ows.utils import Identification
+from apps.geo.models import GeoArray
 
 
 class WMS():
     root = None
-
+    identification = Identification()
     def capabilities(self):
+        geo_arrays = GeoArray.objects.all()
         connection = psycopg2.connect(host="localhost", user="postgres", port=5433, database="modis_metadata")
         cursor = connection.cursor()
         cursor.execute("select * from geo_array")
@@ -36,9 +39,10 @@ class WMS():
             'xmlns:xsi': "http://www.w3.org/2001/XMLSchema-instance"
         })
         service = ElementTree.SubElement(wms_capabilities, 'Service')
-        ElementTree.SubElement(service, 'Name').text = 'WMS'
+        ElementTree.SubElement(service, 'Name').text = 'SciWMS'
         ElementTree.SubElement(service, 'Title').text = 'Web Map Service'
-        ElementTree.SubElement(service, 'Abstract').text = ''
+        print self.identification.data
+        ElementTree.SubElement(service, 'Abstract').text = self.identification.data['identification']['abstract']
         keyword_list = ElementTree.SubElement(service, 'KeywordList')
         ElementTree.SubElement(keyword_list, 'Keyword').text = ''
         ElementTree.SubElement(keyword_list, 'Keyword').text = ''
@@ -48,9 +52,9 @@ class WMS():
         })
         contact_information = ElementTree.SubElement(service, 'ContactInformation')
         contact_person_primary = ElementTree.SubElement(contact_information, 'ContactPersonPrimary')
-        ElementTree.SubElement(contact_person_primary, 'ContactPerson').text = ''
-        ElementTree.SubElement(contact_person_primary, 'ContactOrganization').text = ''
-        ElementTree.SubElement(contact_information, 'ContactPosition').text = ''
+        ElementTree.SubElement(contact_person_primary, 'ContactPerson').text = self.identification.data['provider']['contact']['individual_name']
+        ElementTree.SubElement(contact_person_primary, 'ContactOrganization').text = self.identification.data['provider']['name']
+        ElementTree.SubElement(contact_information, 'ContactPosition').text = self.identification.data['provider']['contact']['position_name']
         contact_address = ElementTree.SubElement(contact_information, 'ContactAddress')
         ElementTree.SubElement(contact_address, 'AddressType').text = ''
         ElementTree.SubElement(contact_address, 'Address').text = ''
@@ -105,25 +109,26 @@ class WMS():
         ElementTree.SubElement(exception, 'Format').text = 'text/xml'
         layer = ElementTree.SubElement(capability, 'Layer')
         ElementTree.SubElement(layer, 'Title').text = 'Web Map Service'
-        ElementTree.SubElement(layer, 'CRS').text = '%s' % (results[0][4])
+        ElementTree.SubElement(layer, 'CRS').text = '%s' % (geo_arrays[0].crs)
         authority_url = ElementTree.SubElement(layer, 'AuthorityURL', attrib={'name': 'DIF_ID'})
         ElementTree.SubElement(authority_url, 'OnlineResource', attrib={
             'xlink:type': 'simple',
             'xlink:href': '%s' % (results[0][3])
         })
-        layer = ElementTree.SubElement(layer, 'Layer')
-        ElementTree.SubElement(layer, 'Name').text = "%s" % (results[0][1])
-        ElementTree.SubElement(layer, 'Title').text = "%s" % (results[0][2])
-        ElementTree.SubElement(layer, 'CRS').text = "%s" % (results[0][4])
-        ElementTree.SubElement(layer, 'BoundingBox', attrib={
-            'CRS': '',
-            'minx': '%s' % (results[0][6]),
-            'miny': '%s' % (results[0][10]),
-            'maxx': '%s' % (results[0][7]),
-            'maxy': '%s' % (results[0][11]),
-            'resx': '%s' % (results[0][8]),
-            'resy': '%s' % (results[0][12])
-        })
+        for i in range(len(geo_arrays)):
+            layeri = ElementTree.SubElement(layer, 'Layer')
+            ElementTree.SubElement(layeri, 'Name').text = "%s" % (geo_arrays[i].name)
+            ElementTree.SubElement(layeri, 'Title').text = "%s" % (geo_arrays[i].description)
+            ElementTree.SubElement(layeri, 'CRS').text = "%s" % (geo_arrays[i].crs)
+            ElementTree.SubElement(layeri, 'BoundingBox', attrib={
+                'CRS': '',
+                'minx': '%s' % (geo_arrays[i].x_min),
+                'miny': '%s' % (geo_arrays[i].y_min),
+                'maxx': '%s' % (geo_arrays[i].x_max),
+                'maxy': '%s' % (geo_arrays[i].y_max),
+                'resx': '%s' % (geo_arrays[i].x_resolution),
+                'resy': '%s' % (geo_arrays[i].y_resolution)
+            })
         cursor.close()
         connection.close()
         return ElementTree.tostring(wms_capabilities)
