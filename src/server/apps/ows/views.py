@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 from handler import RequestHandler, OWSExceptionHandler
 
@@ -17,5 +18,6 @@ class SimpleView(View):
     def get(self, request):
         return self.process_request(request)
 
+    @csrf_exempt
     def post(self, request):
         return self.process_request(request)

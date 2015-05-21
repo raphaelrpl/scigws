@@ -42,28 +42,3 @@ class WCSBase(object):
     def _register_namespaces(self):
         for namespace in self.ns_dict:
             ElementTree.register_namespace(namespace, self.ns_dict[namespace])
-
-    def get_times_db(self, array_id):
-        # Check time series available in scidb, get metadata from postgres
-        psql_connection = connect(**self.config.get('postgres'))
-        cursor = psql_connection.cursor()
-        # cursor.execute("""SELECT g.name, gt.time_point, gt.date FROM geo_array g,
-        #     geo_array_timeline gt WHERE g.array_id = gt.array_id""")
-        cursor.execute("""SELECT g.name, gt.time_point, gt.date FROM geo_array g,
-            geo_array_timeline gt WHERE g.array_id = gt.array_id AND gt.array_id = %i""" % array_id)
-        result = cursor.fetchall()
-        cursor.close()
-        psql_connection.close()
-        return result
-
-
-class CoverageFormat(object):
-    content_type = None
-
-
-class GMLXML(CoverageFormat):
-    content_type = "application/gml+xml"
-
-
-class GeoTIFF(CoverageFormat):
-    content_type = "image/tiff"

@@ -33,8 +33,11 @@ class OWSDict(dict):
                 key_to_list_mapping[key.lower()] = [i.lower() for i in to_iterate.getlist(key)]
         if isinstance(key_to_list_mapping, basestring):
             # TODO: XML Request
-            # import xmltodict
-            # data = xmltodict.parse(key_to_list_mapping)
+            from xmltodict import parse as xml_to_dict
+            from json import dumps as json_dumps, loads as json_loads
+            data = xml_to_dict(key_to_list_mapping)
+            dct = json_loads(json_dumps(data))
+
             # TODO: Validate data
             pass
         super(OWSDict, self).__init__(key_to_list_mapping)

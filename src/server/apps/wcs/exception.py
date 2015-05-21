@@ -31,6 +31,8 @@ class InvalidSubset(WCSException):
 
 
 class InvalidRangeSubSet(WCSException):
+    code = "InvalidRangeSubset"
+
     def __init__(self, msg="Invalid RangeSubset values", locator="rangesubset"):
         super(InvalidRangeSubSet, self).__init__(msg, locator)
 
