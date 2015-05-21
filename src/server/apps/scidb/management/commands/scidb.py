@@ -1,16 +1,17 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.core.management import call_command
 from apps.scidb.db import SciDB
 from apps.scidb.exception import SciDBConnectionError
 from json import loads
 
 
 class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
+    help = 'A scidb command that store dummy data on SciDB and PostgreSQL'
 
     def add_arguments(self, parser):
-        parser.add_argument('--host', action='store_true', dest='host', default="localhost",
+        parser.add_argument('--host', dest='host', default="localhost",
                             help='Type SciDB host: default is localhost')
-        parser.add_argument('--port', action='store_true', dest='port', default=1239,
+        parser.add_argument('--port', dest='port', default=1239,
                             help='Type SciDB host: default is localhost')
 
     def handle(self, *args, **options):
@@ -28,4 +29,8 @@ class Command(BaseCommand):
             result = connection.executeQuery(str(command['afl']), "AFL")
             connection.completeQuery(result.queryID)
             self.stdout.write("Done inserting %s data" % command.get('name', "ARRAY"))
+
+        self.stdout.write("Preparing to load PostgreSQL metadata")
+        call_command("loaddata", "apps/geo/fixtures/initial.json")
+
         self.stdout.write('Command successfully')

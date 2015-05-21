@@ -1,5 +1,3 @@
-from xml.etree import ElementTree
-from exception import OWSException
 from utils import Identification, OWS_MAKER, namespace_xlink
 from encoders import encode_reference
 
