@@ -1,3 +1,5 @@
+from xml.etree import ElementTree
+from xml.etree.ElementTree import Element
 from django.http.request import QueryDict
 from lxml import etree
 from utils import namespace_xsi
@@ -6,6 +8,8 @@ from exception import InvalidParameterValue
 
 class XMLEncoder(object):
     def serialize(self, tree, encoding='iso-8859-1'):
+        if isinstance(tree, Element):
+            return ElementTree.tostring(tree)
         schema_locations = self.get_schema_locations()
         tree.attrib[namespace_xsi("schemaLocation")] = " ".join("%s %s" % (uri, loc)
                                                                 for uri, loc in schema_locations.items())
@@ -24,7 +28,7 @@ class XMLEncoder(object):
 class OWSDict(dict):
     _supported_services = ["wcs", "wms"]
     _supported_versions = ["2.0.0", "2.0.1"]
-    _supported_operations = ["getcapabilities", "describecoverage", "getcoverage", "getmap", "getlayer"]
+    _supported_operations = ["getcapabilities", "describecoverage", "getcoverage", "getmap", "getfeatureinfo"]
 
     def __init__(self, key_to_list_mapping):
         if isinstance(key_to_list_mapping, QueryDict):
@@ -33,10 +37,10 @@ class OWSDict(dict):
                 key_to_list_mapping[key.lower()] = [i.lower() for i in to_iterate.getlist(key)]
         if isinstance(key_to_list_mapping, basestring):
             # TODO: XML Request
-            from xmltodict import parse as xml_to_dict
-            from json import dumps as json_dumps, loads as json_loads
-            data = xml_to_dict(key_to_list_mapping)
-            dct = json_loads(json_dumps(data))
+            # from xmltodict import parse as xml_to_dict
+            # from json import dumps as json_dumps, loads as json_loads
+            # data = xml_to_dict(key_to_list_mapping)
+            # dct = json_loads(json_dumps(data))
 
             # TODO: Validate data
             pass

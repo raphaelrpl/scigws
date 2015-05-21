@@ -1,3 +1,5 @@
+from apps.wms.encoders import WMSGetCapabilitiesEnconder
+from apps.wms.wms import WMS
 from encoders import OWSExceptionResponse
 from exception import InvalidParameterValue
 from apps.wcs.encoders import GetCapabilitiesEncoder, DescribeCoverageEncoder, GetCoverageEncoder
@@ -18,7 +20,8 @@ class OWSExceptionHandler(object):
     @classmethod
     def handle(cls, exception):
         message = exception.message
-        version = "2.0.1"
+
+        version = exception.version or "1.3.0"
         code = getattr(exception, "code", None) or "NoApplicableCode"
         locator = getattr(exception, "locator", None)
 
@@ -32,19 +35,27 @@ class WCSFactory(BaseFactory):
     @staticmethod
     def factory(params):
         request = params.get('request', [''])[0]
+        version = "2.0.1"
         if request == "getcapabilities":
             return GetCapabilitiesEncoder(params)
         if request == "describecoverage":
             return DescribeCoverageEncoder(params)
         if request == "getcoverage":
             return GetCoverageEncoder(params)
-        raise InvalidParameterValue("Invalid request name \"%s\"" % request, locator="request")
+        raise InvalidParameterValue("Invalid request name \"%s\"" % request, locator="request", version='2.0.1')
 
 
 class WMSFactory(BaseFactory):
     @staticmethod
     def factory(params):
-        return
+        request = params.get('request', [''])[0]
+        if request == "getcapabilities":
+            return WMSGetCapabilitiesEnconder(params)
+        if request == "getmap":
+            return
+        if request == "getfeatureinfo":
+            return
+        raise InvalidParameterValue("Invalid request name \"%s\"" % request, locator="request", version='1.3.0')
 
 
 class OWSFactory(BaseFactory):
@@ -54,7 +65,7 @@ class OWSFactory(BaseFactory):
             request, service = params.get_ows_request()
             if service == "wcs":
                 return WCSFactory.factory(params)
-            elif params.get_ows_request() == "wms":
+            elif service == "wms":
                 return WMSFactory.factory(params)
             raise InvalidParameterValue("Invalid service name", locator="service")
         raise InvalidParameterValue("Invalid request name", locator="request")

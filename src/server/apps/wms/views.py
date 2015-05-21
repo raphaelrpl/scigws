@@ -21,7 +21,7 @@ from django.views.generic.base import View
 from wms import WMS
 
 
-class Capabilities(View):
+class WMSView(View):
     def get(self, request):
         service = request.GET.get('SERVICE', '')
         req = request.GET.get('REQUEST', '')

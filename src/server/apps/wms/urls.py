@@ -17,9 +17,9 @@
 #
 
 from django.conf.urls import patterns, url
-from views import Capabilities
+from views import WMSView
 
 
 urlpatterns = patterns('',
-   url(r'^$', Capabilities.as_view()),
+   url(r'^$', WMSView.as_view()),
 )
