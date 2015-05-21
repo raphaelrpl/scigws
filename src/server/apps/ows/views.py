@@ -3,7 +3,7 @@ from django.views.generic.base import View
 from handler import RequestHandler, OWSExceptionHandler
 
 
-class SimpleView(View):
+class OWSView(View):
     def process_request(self, request):
         code = 200
         try:
