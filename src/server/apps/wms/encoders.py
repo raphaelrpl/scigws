@@ -93,25 +93,25 @@ class WMSGetCapabilitiesEnconder(WMSEncoder):
         ElementTree.SubElement(exception, 'Format').text = 'text/xml'
         layer = ElementTree.SubElement(capability, 'Layer')
         ElementTree.SubElement(layer, 'Title').text = 'Web Map Service'
-        ElementTree.SubElement(layer, 'CRS').text = '%s' % (geo_arrays[0].crs)
+        ElementTree.SubElement(layer, 'CRS').text = '%s' % geo_arrays[0].crs
         authority_url = ElementTree.SubElement(layer, 'AuthorityURL', attrib={'name': 'DIF_ID'})
         ElementTree.SubElement(authority_url, 'OnlineResource', attrib={
             'xlink:type': 'simple',
             'xlink:href': '%s' % (results[0][3])
         })
-        for i in range(len(geo_arrays)):
+        for geo in geo_arrays:
             layeri = ElementTree.SubElement(layer, 'Layer')
-            ElementTree.SubElement(layeri, 'Name').text = "%s" % (geo_arrays[i].name)
-            ElementTree.SubElement(layeri, 'Title').text = "%s" % (geo_arrays[i].description)
-            ElementTree.SubElement(layeri, 'CRS').text = "%s" % (geo_arrays[i].crs)
+            ElementTree.SubElement(layeri, 'Name').text = "%s" % geo.name
+            ElementTree.SubElement(layeri, 'Title').text = "%s" % geo.description
+            ElementTree.SubElement(layeri, 'CRS').text = "%s" % geo.crs
             ElementTree.SubElement(layeri, 'BoundingBox', attrib={
                 'CRS': '',
-                'minx': '%s' % (geo_arrays[i].x_min),
-                'miny': '%s' % (geo_arrays[i].y_min),
-                'maxx': '%s' % (geo_arrays[i].x_max),
-                'maxy': '%s' % (geo_arrays[i].y_max),
-                'resx': '%s' % (geo_arrays[i].x_resolution),
-                'resy': '%s' % (geo_arrays[i].y_resolution)
+                'minx': '%s' % geo.x_min,
+                'miny': '%s' % geo.y_min,
+                'maxx': '%s' % geo.x_max,
+                'maxy': '%s' % geo.y_max,
+                'resx': '%s' % geo.x_resolution,
+                'resy': '%s' % geo.y_resolution
             })
         cursor.close()
         connection.close()
