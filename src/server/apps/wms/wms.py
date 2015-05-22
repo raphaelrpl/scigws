@@ -17,12 +17,13 @@
 #
 
 from xml.etree import ElementTree
-import psycopg2
 from apps.ows.utils import Identification
 from apps.geo.models import GeoArray
+import psycopg2
 
 
 class WMS():
+
     identification = Identification()
     def capabilities(self):
         geo_arrays = GeoArray.objects.all()
