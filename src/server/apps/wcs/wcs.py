@@ -65,7 +65,7 @@ class WCS(object):
             params[key] = {'epsg': epsg, 'dimension': dimension}
             if key != self.geo_array.x_dim_name and key != self.geo_array.y_dim_name \
                     and key != self.geo_array.t_dim_name:
-                raise InvalidAxisLabel("\"%s\" is not valid axis. " % sub, locator="subset")
+                raise InvalidAxisLabel("\"%s\" is not valid axis. " % sub, locator="subset", version="2.0.1")
         return params
 
     def _get_bands_from(self, bands):
@@ -114,7 +114,7 @@ class WCS(object):
     def describe_coverage(self, params):
         coverages_ids = params.get('coverageid', [])
         if not coverages_ids:
-            raise MissingParameterValue("Missing coverageID parameter", locator="coverageID")
+            raise MissingParameterValue("Missing coverageID parameter", locator="coverageID", version="2.0.1")
         coverages_ids = ",".join(coverages_ids).split(",")
         self.geo_arrays = GeoArray.objects.filter(name__in=coverages_ids)
         if not self.geo_arrays:
@@ -123,9 +123,9 @@ class WCS(object):
     def get_coverage(self, params):
         coverage_id = params.get('coverageid', [])
         if not coverage_id:
-            raise MissingParameterValue("Missing coverageID parameter", locator="coverageID")
+            raise MissingParameterValue("Missing coverageID parameter", locator="coverageID", version="2.0.1")
         if len(coverage_id) > 1:
-            raise InvalidParameterValue("Invalid coverage with id \"%s\"" % "".join(coverage_id), locator="coverageID")
+            raise InvalidParameterValue("Invalid coverage with id \"%s\"" % "".join(coverage_id), locator="coverageID", version="2.0.1")
         try:
             self.geo_array = GeoArray.objects.get(name=coverage_id[0])
             self.bands_input = [band.name for band in self.geo_array.geoarrayattribute_set.all()]
@@ -160,7 +160,7 @@ class WCS(object):
         except ObjectDoesNotExist:
             raise NoSuchCoverageException()
         except ValueError as e:
-            raise InvalidParameterValue("Invalid parameter \"%s\"" % e.message, locator="subset")
+            raise InvalidParameterValue("Invalid parameter \"%s\"" % e.message, locator="subset", version="2.0.1")
         except (IndexError, InvalidParameterValue) as e:
             raise e
         except SciDBConnectionError as e:

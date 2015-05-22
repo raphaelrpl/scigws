@@ -35,7 +35,6 @@ class WCSFactory(BaseFactory):
     @staticmethod
     def factory(params):
         request = params.get('request', [''])[0]
-        version = "2.0.1"
         if request == "getcapabilities":
             return GetCapabilitiesEncoder(params)
         if request == "describecoverage":

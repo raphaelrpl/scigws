@@ -2,10 +2,12 @@ class WCSException(Exception):
     """ Base Exception """
     code = None
     locator = None
+    version = None
 
-    def __init__(self, msg, locator=None):
+    def __init__(self, msg, locator=None, version="2.0.1"):
         super(WCSException, self).__init__(msg)
         self.locator = locator
+        self.version = version
 
 
 class LocatorListException(Exception):
