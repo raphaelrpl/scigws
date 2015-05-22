@@ -3,19 +3,19 @@ GeoWeb Services on Top of SciDB
 
 ### Installation
 
-1. Clone this repository
+Clone this repository
 ```bash
 git clone https://github.com/gqueiroz/scigws.git
 ```
 
-2. Navigate to scigws/src/server and run **/venv/venv.sh** and activate the enviroment
+Navigate to scigws/src/server and run **/venv/venv.sh** and activate the enviroment
 ```bash
 cd scigws/src/
 ./venv/venv.sh
 source venv/bin/activate
 ```
 
-3. Change/check SCIDB_VERSION and Database config on **server/settings.py**
+Change/check SCIDB_VERSION and Database config on **server/settings.py**
 ```python
 SCIDB_VERSION = "14.3"
 DATABASES = {
@@ -30,17 +30,17 @@ DATABASES = {
 }
 ```
 
-4. Initialize the database migration models
+Initialize the database migration models
 ```bash
 python manage.py migrate
 ```
 
-5. Run the scidb django command. **Be sure that the scidb is running**
+Run the scidb django command. **Be sure that the scidb is running**
 ```bash
 python manage.py scidb
 ```
 
-6. Start django developement server
+Start django developement server
 ```bash
 python manage.py runserver
 ```
