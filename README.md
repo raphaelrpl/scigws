@@ -13,7 +13,6 @@ GeoWeb Services on Top of SciDB
 
 3. Change/check SCIDB_VERSION and Database config on **server/settings.py**
         SCIDB_VERSION = "14.3"
-
         DATABASES = {
            'default': {
                'ENGINE': 'django.db.backends.postgresql_psycopg2',
