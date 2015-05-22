@@ -17,12 +17,13 @@
 #
 
 from xml.etree import ElementTree
-import psycopg2
 from apps.ows.utils import Identification
 from apps.geo.models import GeoArray
+import psycopg2
 
 
 class WMS():
+
     identification = Identification()
     def capabilities(self):
         geo_arrays = GeoArray.objects.all()
@@ -116,17 +117,17 @@ class WMS():
         })
         for i in range(len(geo_arrays)):
             layeri = ElementTree.SubElement(layer, 'Layer')
-            ElementTree.SubElement(layeri, 'Name').text = "%s" % (geo_arrays[i].name)
-            ElementTree.SubElement(layeri, 'Title').text = "%s" % (geo_arrays[i].description)
-            ElementTree.SubElement(layeri, 'CRS').text = "%s" % (geo_arrays[i].crs)
+            ElementTree.SubElement(layeri, 'Name').text = "%s" % geo_arrays[i].name
+            ElementTree.SubElement(layeri, 'Title').text = "%s" % geo_arrays[i].description
+            ElementTree.SubElement(layeri, 'CRS').text = "%s" % geo_arrays[i].crs
             ElementTree.SubElement(layeri, 'BoundingBox', attrib={
                 'CRS': '',
-                'minx': '%s' % (geo_arrays[i].x_min),
-                'miny': '%s' % (geo_arrays[i].y_min),
-                'maxx': '%s' % (geo_arrays[i].x_max),
-                'maxy': '%s' % (geo_arrays[i].y_max),
-                'resx': '%s' % (geo_arrays[i].x_resolution),
-                'resy': '%s' % (geo_arrays[i].y_resolution)
+                'minx': '%s' % geo_arrays[i].x_min,
+                'miny': '%s' % geo_arrays[i].y_min,
+                'maxx': '%s' % geo_arrays[i].x_max,
+                'maxy': '%s' % geo_arrays[i].y_max,
+                'resx': '%s' % geo_arrays[i].x_resolution,
+                'resy': '%s' % geo_arrays[i].y_resolution
             })
         cursor.close()
         connection.close()
