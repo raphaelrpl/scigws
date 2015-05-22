@@ -10,7 +10,7 @@ git clone https://github.com/gqueiroz/scigws.git
 
 Navigate to scigws/src/server and run **/venv/venv.sh** and activate the enviroment
 ```bash
-cd scigws/src/
+cd scigws/src/server
 ./venv/venv.sh
 source venv/bin/activate
 ```
