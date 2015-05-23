@@ -21,7 +21,7 @@ class OWSExceptionHandler(object):
     def handle(cls, exception):
         message = exception.message
 
-        version = exception.version or "1.3.0"
+        version = getattr(exception, "version", "1.3.0")
         code = getattr(exception, "code", None) or "NoApplicableCode"
         locator = getattr(exception, "locator", None)
 

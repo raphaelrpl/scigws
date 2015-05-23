@@ -44,3 +44,10 @@ Start django developement server
 ```bash
 python manage.py runserver
 ```
+
+WCS Examples:
+> http://127.0.0.1:8000/ows?service=WCS&request=GetCapabilities
+> http://127.0.0.1:8000/ows?service=WCS&request=GetCoverage&coverageid=mcd43a4&rangesubset=b1,b2,b3
+
+WMS Example
+> http://127.0.0.1:8000/ows?service=WMS&request=GetCapabilities

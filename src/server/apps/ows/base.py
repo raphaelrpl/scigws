@@ -27,7 +27,7 @@ class XMLEncoder(object):
 
 class OWSDict(dict):
     _supported_services = ["wcs", "wms"]
-    _supported_versions = ["2.0.0", "2.0.1"]
+    _supported_versions = ["2.0.0", "2.0.1", "1.3.0"]
     _supported_operations = ["getcapabilities", "describecoverage", "getcoverage", "getmap", "getfeatureinfo"]
 
     def __init__(self, key_to_list_mapping):
