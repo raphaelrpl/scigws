@@ -15,7 +15,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SCIDB_VERSION = "14.12"
+SCIDB_VERSION = "14.3"
 
 APPEND_SLASH = True
 
@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     # APPS
+    'server',
     'apps.geo',
     'apps.ows',
     'apps.wcs',
@@ -85,6 +86,11 @@ WSGI_APPLICATION = 'server.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
+SCIDB_CONFIG = {
+    'host': 'localhost',
+    'port': 1239
+}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -92,7 +98,7 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': '',
         'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'PORT': '5433',
     }
 }
 

@@ -42,7 +42,7 @@ python manage.py scidb
 
 Start django developement server
 ```bash
-python manage.py runserver
+python manage.py run
 ```
 
 WCS Examples:
