@@ -6,20 +6,6 @@ function to_console {
     echo -e "\n*** $1 ***\n"
 }
 
-function os_type {
-case `uname` in
-  Linux )
-     LINUX=1
-     which yum && { echo centos; return; }
-     which zypper && { echo opensuse; return; }
-     which apt-get && { echo debian; return; }
-     ;;
-     * )
-     # Handle AmgiaOS, CPM, and modified cable modems here.
-     ;;
-esac
-}
-
 cd $(dirname $0) && cd ..
 
 

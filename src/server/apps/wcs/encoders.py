@@ -46,6 +46,7 @@ class GetCapabilitiesEncoder(WCSEncoder):
                         "endPosition",
                         wcs.times[geo_array][-1].date.strftime("%Y-%m-%dT%H:%M:%S")
                     ),
+                    GML_MAKER("timeInterval", str(geo_array.t_resolution)),
                     **{namespace_gml('id'): geo_array.name}
                 )
             )
@@ -59,8 +60,6 @@ class GetCapabilitiesEncoder(WCSEncoder):
         contents.append(extension)
 
         nodes.append(contents)
-
-        # nodes.append(extension)
 
         root = WCS_MAKER("Capabilities", *nodes, version="2.0.1")
 
@@ -122,7 +121,8 @@ class DescribeCoverageEncoder(WCSEncoder):
                 GML_MAKER(
                     "TimePeriod",
                     GML_MAKER("beginPosition", time_periods[0]),
-                    GML_MAKER("endPosition", time_periods[-1])
+                    GML_MAKER("endPosition", time_periods[-1]),
+                    GML_MAKER("timeInterval", str(geo.t_resolution))
                 ),
                 GMLCOV_MAKER(
                     "rangeType",
@@ -219,4 +219,5 @@ class GetCoverageEncoder(WCSEncoder):
         nodes.append(range_type)
 
         root = GMLCOV_MAKER("GridCoverage", *nodes, version="2.0.1")
+
         return root
