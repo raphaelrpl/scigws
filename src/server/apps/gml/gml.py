@@ -1,6 +1,44 @@
 from xml.etree import ElementTree
 from exception import GMLException
 from apps.geo.models import GeoArrayTimeLine
+from base import GMLRangeBase, GMLBase
+
+
+class GMLLowerCorner(GMLRangeBase):
+    def __init__(self, limits, **attributes):
+        """ It defines a GMLLowerCorner node based in WCS 2.0 """
+        super(GMLLowerCorner, self).__init__("lowerCorner", limits, **attributes)
+
+
+class GMLUpperCorner(GMLRangeBase):
+    def __init__(self, limits, **attributes):
+        """ It defines a GMLUpperCorner node based in WCS 2.0 """
+        super(GMLUpperCorner, self).__init__("upperCorner", limits, **attributes)
+
+
+class GMLEnvelope(GMLBase):
+    def __init__(self, data, **attributes):
+        super(GMLEnvelope, self).__init__(**attributes)
+        self.node_name = "Envelope"
+        self.attributes = attributes
+        self.data = data
+        self.lower = GMLLowerCorner(data.get('min'))
+        self.upper = GMLLowerCorner(data.get('max'))
+        nodes = [self.lower.root, self.upper.root]
+        self.root = self.maker(self.node_name, **attributes)
+        self.root.extend(nodes)
+
+
+class GMLBoundedBy(GMLBase):
+    envelope = None
+
+    def __init__(self, data, **attributes):
+        super(GMLBoundedBy, self).__init__(**attributes)
+        self.node_name = "boundedBy"
+
+        self.envelope = GMLEnvelope(data)
+
+        self.root = self.maker(self.node_name, self.envelope.root, **attributes)
 
 
 class GMLMeta(object):
