@@ -8,6 +8,8 @@ from apps.gml.utils import GML_MAKER, GMLCOV_MAKER, namespace_gml
 
 
 class WCSEncoder(OWSEncoder):
+    request = ""
+
     def __init__(self, params):
         self.params = params
 
@@ -16,6 +18,8 @@ class WCSEncoder(OWSEncoder):
 
 
 class GetCapabilitiesEncoder(WCSEncoder):
+    request = "getcapabilities"
+
     def encode(self, request):
         nodes = []
         ows = OWSMeta(url=request.build_absolute_uri().split('?')[0] + "?")
@@ -67,6 +71,8 @@ class GetCapabilitiesEncoder(WCSEncoder):
 
 
 class DescribeCoverageEncoder(WCSEncoder):
+    request = "describecoverage"
+
     def __init__(self, params):
         if not params.get('coverageid', []):
             raise MissingParameterValue("Missing parameter coverageID", locator="coverageID")
@@ -139,6 +145,8 @@ class DescribeCoverageEncoder(WCSEncoder):
 
 
 class GetCoverageEncoder(WCSEncoder):
+    request = "getcoverage"
+
     def encode(self, request):
         nodes = []
         wcs = WCS()
@@ -193,7 +201,7 @@ class GetCoverageEncoder(WCSEncoder):
 
         # SciDB data
         time_series = ""
-        for i in range(len(wcs.data.values()[0])):
+        for i in xrange(len(wcs.data.values()[0])):
             for attr_dict in wcs.bands_input:
                 time_series += " %i" % wcs.data[attr_dict][i]
             time_series = time_series.rstrip(" ") + ","
