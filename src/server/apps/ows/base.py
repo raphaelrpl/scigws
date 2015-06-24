@@ -37,19 +37,38 @@ class OWSDict(dict):
                 key_to_list_mapping[key.lower()] = [i.lower() for i in to_iterate.getlist(key)]
         if isinstance(key_to_list_mapping, basestring):
             # TODO: XML Request
-            # from xmltodict import parse as xml_to_dict
-            # from json import dumps as json_dumps, loads as json_loads
-            # data = xml_to_dict(key_to_list_mapping)
-            # dct = json_loads(json_dumps(data))
+            from xmltodict import parse as xml_to_dict
+            from json import dumps as json_dumps, loads as json_loads
+            data = xml_to_dict(key_to_list_mapping)
+            dct = json_loads(json_dumps(data))
 
-            # TODO: Validate data
-            pass
+            def iterate_dict(nested):
+                for key, value in nested.iteritems():
+                    if isinstance(value, dict):
+                        for inner_key, inner_value in iterate_dict(value):
+                            yield inner_key, inner_value
+                    else:
+                        yield key, value
+
+            list_elements = list(iterate_dict(dct))
+            k = dct.keys()[0].lower()
+            request = k if ':' not in k else k.split(':')[1]
+            key_to_list_mapping = {'request': [request]}
+            for element in list_elements:
+                if element[0].lower() == "@service" or element[0].lower() == "@version":
+                    key_to_list_mapping[element[0][1:].lower()] = [element[1].lower()]
+                elif not element[0].startswith('@'):
+                    e = element[0].lower()
+                    if ':' in e:
+                        e = e.split(':')[1].lower()
+                    key_to_list_mapping[e] = [element[1].lower()]
         super(OWSDict, self).__init__(key_to_list_mapping)
         self._is_valid_ows_request()
         self.coverage_id_formatter()
 
     def _is_valid_ows_request(self):
         service = self.get('service', ' ')
+        # service = service if isinstance(service, basestring) else service[0]
         if service[0] not in self._supported_services:
             raise InvalidParameterValue("Invalid service name", locator="service")
         version = self.get('version', ['2.0.1'])
