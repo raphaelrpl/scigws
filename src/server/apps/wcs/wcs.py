@@ -94,7 +94,7 @@ class WCS(object):
         # from matplotlib import cm
         import numpy as np
         h, w = 720, 720
-        myarray = np.zeros((w, h), dtype=np.uint32)
+        myarray = np.zeros((w, h))
 
         for i in range(dimensions.size()):
             if dimensions[i].getBaseName() != "EmptyTag":
@@ -110,7 +110,9 @@ class WCS(object):
                     values.append(scidbapi.getTypedValue(value_iterator.getItem(), iterator[1]))
                     # myarray[720-1-coordinates[1]][coordinates[0]] = scidbapi.getTypedValue(
                     # value_iterator.getItem(), iterator[1])
-                    myarray[h-1-coordinates[1]][coordinates[0]] = value_iterator.getItem().getDouble()
+                    # myarray[h-1-coordinates[1]][coordinates[0]] = value_iterator.getItem().getDouble()
+                    if ((coordinates[1]) < h) and (coordinates[0] < w):
+                        myarray[h - 1 - coordinates[1]] = scidbapi.getTypedValue(value_iterator.getItem(), iterator[1])
                     value_iterator.increment_to_next()
                 try:
                     iterator[2].increment_to_next()
@@ -119,26 +121,11 @@ class WCS(object):
             output[iterator[0]] = values
         connection.completeQuery(result.queryID)
         connection.disconnect()
-        #
-        # import Image
-        # import numpy as np
-        #
-        # data = np.random.random((100,100))
-        #
-        # #Rescale to 0-255 and convert to uint8
-        # rescaled = (255.0 / myarray.max() * (myarray - myarray.min())).astype(np.uint8)
-        #
-        # im = Image.fromarray(rescaled)
-        # im.save('test.jpeg')
 
-        # rescaled = (255.0 / myarray.max() * (myarray - myarray.min())).astype(np.uint8)
-        # img = Image.fromarray(rescaled)
-        # img.save('my.png')
-        # im = Image.fromarray(myarray).convert('RGB')
-        # im.save("te.jpeg")
-        # plt.imshow(myarray)
-        # plt.savefig('testeg.png')
-        # plt.show()
+        import matplotlib.pyplot as plt
+        plt.imsave('teste0.png', myarray)
+        print("SAVED IMAGE teste9.png")
+
         return output
 
     def describe_coverage(self, params):
