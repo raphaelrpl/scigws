@@ -2,8 +2,8 @@ from apps.wms.encoders import WMSGetCapabilitiesEnconder
 from apps.wms.wms import WMS
 from encoders import OWSExceptionResponse
 from exception import InvalidParameterValue
-from apps.wcs.encoders import GetCapabilitiesEncoder, DescribeCoverageEncoder, GetCoverageEncoder
-from base import OWSDict, BaseFactory
+from apps.wcs.encoders import GetCapabilitiesEncoder, DescribeCoverageEncoder, GetCoverageEncoder, WCSEncoder
+from base import OWSDict
 
 
 class RequestHandler(object):
@@ -14,6 +14,20 @@ class RequestHandler(object):
         else:
             service_request = OWSDict(request.body)
         return OWSFactory.factory(service_request)
+
+
+class OWSFactory(object):
+    service = ""
+
+    @staticmethod
+    def factory(params):
+        if isinstance(params, OWSDict) or issubclass(params, OWSDict):
+            request, service = params.get_ows_request()
+            for factory_class in type.__subclasses__(OWSFactory):
+                if factory_class.service == service:
+                    return factory_class.factory(params)
+            raise InvalidParameterValue("Invalid service name", locator="service")
+        raise InvalidParameterValue("Invalid request name", locator="request")
 
 
 class OWSExceptionHandler(object):
@@ -31,20 +45,21 @@ class OWSExceptionHandler(object):
                                                     locator=locator)), response.content_type
 
 
-class WCSFactory(BaseFactory):
+class WCSFactory(OWSFactory):
+    service = "wcs"
+
     @staticmethod
     def factory(params):
         request = params.get('request', [''])[0]
-        if request == "getcapabilities":
-            return GetCapabilitiesEncoder(params)
-        if request == "describecoverage":
-            return DescribeCoverageEncoder(params)
-        if request == "getcoverage":
-            return GetCoverageEncoder(params)
+        for klass in type.__subclasses__(WCSEncoder):
+            if klass.request.lower() == request:
+                return klass(params)
         raise InvalidParameterValue("Invalid request name \"%s\"" % request, locator="request", version='2.0.1')
 
 
-class WMSFactory(BaseFactory):
+class WMSFactory(OWSFactory):
+    service = "wms"
+
     @staticmethod
     def factory(params):
         request = params.get('request', [''])[0]
@@ -55,16 +70,3 @@ class WMSFactory(BaseFactory):
         if request == "getfeatureinfo":
             return
         raise InvalidParameterValue("Invalid request name \"%s\"" % request, locator="request", version='1.3.0')
-
-
-class OWSFactory(BaseFactory):
-    @staticmethod
-    def factory(params):
-        if isinstance(params, OWSDict):
-            request, service = params.get_ows_request()
-            if service == "wcs":
-                return WCSFactory.factory(params)
-            elif service == "wms":
-                return WMSFactory.factory(params)
-            raise InvalidParameterValue("Invalid service name", locator="service")
-        raise InvalidParameterValue("Invalid request name", locator="request")
