@@ -82,6 +82,9 @@ class WCS(object):
     def get_scidb_data(cls, query, lang="AFL"):
         connection = SciDB(**DBConfig().get_scidb_credentials())
         result = connection.executeQuery(str(query), lang)
+        # a = connection.objects.to_array()
+        # import matplotlib.pyplot as plt
+        # plt.imsave("output.jpg", a)
         desc = result.array.getArrayDesc()
         attributes = desc.getAttributes()
         attributes = [attributes[i] for i in range(attributes.size()) if attributes[i].getName() != "EmptyTag"]
@@ -90,11 +93,11 @@ class WCS(object):
         output = {}
         dimensions = desc.getDimensions()
         dnames = []
-        # import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt
         # from matplotlib import cm
-        import numpy as np
-        h, w = 720, 720
-        myarray = np.zeros((w, h))
+        # import numpy as np
+        # h, w = 720, 720
+        # myarray = np.zeros((w, h))
 
         for i in range(dimensions.size()):
             if dimensions[i].getBaseName() != "EmptyTag":
@@ -105,14 +108,14 @@ class WCS(object):
                 value_iterator = iterator[2].getChunk().getConstIterator(
                     scidbapi.swig.ConstChunkIterator.IGNORE_OVERLAPS |
                     scidbapi.swig.ConstChunkIterator.IGNORE_EMPTY_CELLS)
-                coordinates = value_iterator.getPosition()
+                # coordinates = value_iterator.getPosition()
                 while not value_iterator.end():
                     values.append(scidbapi.getTypedValue(value_iterator.getItem(), iterator[1]))
                     # myarray[720-1-coordinates[1]][coordinates[0]] = scidbapi.getTypedValue(
                     # value_iterator.getItem(), iterator[1])
                     # myarray[h-1-coordinates[1]][coordinates[0]] = value_iterator.getItem().getDouble()
-                    if ((coordinates[1]) < h) and (coordinates[0] < w):
-                        myarray[h - 1 - coordinates[1]] = scidbapi.getTypedValue(value_iterator.getItem(), iterator[1])
+                    # if ((coordinates[1]) < h) and (coordinates[0] < w):
+                    #     myarray[h - 1 - coordinates[1]] = scidbapi.getTypedValue(value_iterator.getItem(), iterator[1])
                     value_iterator.increment_to_next()
                 try:
                     iterator[2].increment_to_next()
@@ -122,8 +125,7 @@ class WCS(object):
         connection.completeQuery(result.queryID)
         connection.disconnect()
 
-        import matplotlib.pyplot as plt
-        plt.imsave('teste0.png', myarray)
+        # plt.imsave('teste0.png', myarray)
         print("SAVED IMAGE teste9.png")
 
         return output
