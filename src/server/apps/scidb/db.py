@@ -93,6 +93,7 @@ class SciDBResultSet:
 
 class SciDB(scidbapi.Connection):
     objects = None
+    result_set = None
 
     def __init__(self, host, port=1239):
         try:
@@ -109,26 +110,27 @@ class SciDB(scidbapi.Connection):
 
         def iterate(it):
             yield it
-        for result in self.result_set:
-            key, value = result
-            self.objects[",".join([str(v) for v in key])] = value
+        # for res in self.result_set:
+        #     key, value = res
+        #     self.objects[",".join([str(v) for v in key])] = value
         import pandas as pd
         import numpy as np
+
         import Image
-        a = np.array([[[1,2,3],4],[[4,5,6],5]])
-        b = a[:,0]
-
-        c = np.vstack(b)
-        print c.shape # (2,3)
-        array = pd.Series(self.objects).values
-        bd = np.vstack(array)
-        rescaled = (255.0 / bd.max() * (bd - bd.min())).astype(np.uint8)
-        im = Image.fromarray(rescaled)
-        im.save("image.png")
-
-        # min_dims = min(self.objects).split(',')
-        max_dims = max(self.objects).split(',')
-        x, y, t = max_dims
+        # a = np.array([[[1,2,3],4],[[4,5,6],5]])
+        # b = a[:,0]
+        #
+        # c = np.vstack(b)
+        # print c.shape # (2,3)
+        # array = pd.Series(self.objects).values
+        # bd = np.vstack(array)
+        # rescaled = (255.0 / bd.max() * (bd - bd.min())).astype(np.uint8)
+        # im = Image.fromarray(rescaled)
+        # im.save("image.png")
+        #
+        # # min_dims = min(self.objects).split(',')
+        # max_dims = max(self.objects).split(',')
+        # x, y, t = max_dims
         # b = array.reshape((int(x), int(y), int(t)))
 
         return result

@@ -126,7 +126,15 @@ class WCS(object):
         connection.disconnect()
 
         # plt.imsave('teste0.png', myarray)
-        print("SAVED IMAGE teste9.png")
+        import osgeo.gdal as gdal
+        import numpy as np
+        if output.get('b1'):
+            b1 = np.reshape(np.array(output.get('b1', [])), (-1, 2))
+            driver = gdal.GetDriverByName('GTiff')
+
+            dataset = driver.Create("imagem.tif", 2, 54, 1, gdal.GDT_UInt16)
+            dataset.GetRasterBand(1).WriteArray(b1)
+            print("SAVED IMAGE imagem.tif")
 
         return output
 

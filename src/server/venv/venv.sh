@@ -9,7 +9,7 @@ function to_console {
 cd $(dirname $0) && cd ..
 
 
-virtualenv venv
+virtualenv venv --system-site-packages --python=python2.7
 
 echo "Creating virtualenv..."
 source venv/bin/activate
