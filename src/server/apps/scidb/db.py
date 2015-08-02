@@ -13,6 +13,8 @@ class SciDBResultSet:
     query_result = None
     attr_iterators = None
     chunk_iterators = None
+    dummy_attr_it = None
+    # dummy_chunk_it = None
 
     def __init__(self, query_result):
         self.query_result = query_result
@@ -102,10 +104,36 @@ class SciDB(scidbapi.Connection):
 
     def executeQuery(self, query, lang="afl"):
         result = super(SciDB, self).executeQuery(query, lang)
-        self.objects = SciDBResultSet(result)
+        self.result_set = SciDBResultSet(result)
+        self.objects = {}
+
+        def iterate(it):
+            yield it
+        for result in self.result_set:
+            key, value = result
+            self.objects[",".join([str(v) for v in key])] = value
+        import pandas as pd
+        import numpy as np
+        import Image
+        a = np.array([[[1,2,3],4],[[4,5,6],5]])
+        b = a[:,0]
+
+        c = np.vstack(b)
+        print c.shape # (2,3)
+        array = pd.Series(self.objects).values
+        bd = np.vstack(array)
+        rescaled = (255.0 / bd.max() * (bd - bd.min())).astype(np.uint8)
+        im = Image.fromarray(rescaled)
+        im.save("image.png")
+
+        # min_dims = min(self.objects).split(',')
+        max_dims = max(self.objects).split(',')
+        x, y, t = max_dims
+        # b = array.reshape((int(x), int(y), int(t)))
+
         return result
 
     def __del__(self):
-        if self.objects:
-            print("Closing Active Query - ", self.objects.query_result.queryID)
-            self.completeQuery(self.objects.query_result.queryID)
+        if self.result_set:
+            print("Closing Active Query - ", self.result_set.query_result.queryID)
+            self.completeQuery(self.result_set.query_result.queryID)
