@@ -44,6 +44,9 @@ class GeoArray(models.Model):
         return (self.geoarraytimeline_set.all().aggregate(models.Min('date')).get('date__min').strftime("%Y-%m-%dT%H:%M:%S"),
                 self.geoarraytimeline_set.all().aggregate(models.Max('date')).get('date__max').strftime("%Y-%m-%dT%H:%M:%S"))
 
+    def geo_range(self):
+        return {"min": [self.x_min, self.x_max], "max": [self.y_min, self.y_max]}
+
 
 class GeoArrayAttribute(models.Model):
     array = models.ForeignKey(GeoArray)
