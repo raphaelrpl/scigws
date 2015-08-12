@@ -82,6 +82,7 @@ class WCS(object):
     def get_scidb_data(cls, query, lang="AFL"):
         connection = SciDB(**DBConfig().get_scidb_credentials())
         result = connection.executeQuery(str(query), lang)
+        print(query)
         # a = connection.objects.to_array()
         # import matplotlib.pyplot as plt
         # plt.imsave("output.jpg", a)
@@ -99,42 +100,66 @@ class WCS(object):
         # h, w = 720, 720
         # myarray = np.zeros((w, h))
 
-        for i in range(dimensions.size()):
-            if dimensions[i].getBaseName() != "EmptyTag":
-                dnames.append(dimensions[i].getBaseName())
-        for iterator in attribute_iterators:
-            values = []
-            while not iterator[2].end():
-                value_iterator = iterator[2].getChunk().getConstIterator(
-                    scidbapi.swig.ConstChunkIterator.IGNORE_OVERLAPS |
-                    scidbapi.swig.ConstChunkIterator.IGNORE_EMPTY_CELLS)
-                # coordinates = value_iterator.getPosition()
-                while not value_iterator.end():
-                    values.append(scidbapi.getTypedValue(value_iterator.getItem(), iterator[1]))
-                    # myarray[720-1-coordinates[1]][coordinates[0]] = scidbapi.getTypedValue(
-                    # value_iterator.getItem(), iterator[1])
-                    # myarray[h-1-coordinates[1]][coordinates[0]] = value_iterator.getItem().getDouble()
-                    # if ((coordinates[1]) < h) and (coordinates[0] < w):
-                    #     myarray[h - 1 - coordinates[1]] = scidbapi.getTypedValue(value_iterator.getItem(), iterator[1])
-                    value_iterator.increment_to_next()
-                try:
-                    iterator[2].increment_to_next()
-                except StandardError:
-                    pass
-            output[iterator[0]] = values
-        connection.completeQuery(result.queryID)
-        connection.disconnect()
+        # for i in range(dimensions.size()):
+        #     if dimensions[i].getBaseName() != "EmptyTag":
+        #         dnames.append(dimensions[i].getBaseName())
+
+        # print 1000
+        # pos = attribute_iterators[0][2].getPosition()
+        # first_x, first_y, first_t = pos[0], pos[1], pos[2]
+        # for iterator in attribute_iterators:
+        #     values = []
+        #     while not iterator[2].end():
+        #         value_iterator = iterator[2].getChunk().getConstIterator(
+        #             scidbapi.swig.ConstChunkIterator.IGNORE_OVERLAPS |
+        #             scidbapi.swig.ConstChunkIterator.IGNORE_EMPTY_CELLS)
+        #         # coordinates = value_iterator.getPosition()
+        #         while not value_iterator.end():
+        #             values.append(scidbapi.getTypedValue(value_iterator.getItem(), iterator[1]))
+        #             # myarray[720-1-coordinates[1]][coordinates[0]] = scidbapi.getTypedValue(
+        #             # value_iterator.getItem(), iterator[1])
+        #             # myarray[h-1-coordinates[1]][coordinates[0]] = value_iterator.getItem().getDouble()
+        #             # if ((coordinates[1]) < h) and (coordinates[0] < w):
+        #             #     myarray[h - 1 - coordinates[1]] = scidbapi.getTypedValue(value_iterator.getItem(), iterator[1])
+        #             value_iterator.increment_to_next()
+        #         try:
+        #             iterator[2].increment_to_next()
+        #         except StandardError:
+        #             pass
+        #     output[iterator[0]] = values
+        #
+        # pos2 = attribute_iterators[0][2].getPosition()
+        # last_x, last_y, last_t = pos[0], pos[1], pos[2]
+        arraylist = []
+
+        for res in connection.result_set:
+            key, value = res
+            arraylist.append({"index": key, "values": value})
+
+        first, last = arraylist[0], arraylist[-1]
 
         # plt.imsave('teste0.png', myarray)
         import osgeo.gdal as gdal
         import numpy as np
-        if output.get('b1'):
-            b1 = np.reshape(np.array(output.get('b1', [])), (-1, 2))
-            driver = gdal.GetDriverByName('GTiff')
+        # if output.get('red'):
 
-            dataset = driver.Create("imagem.tif", 2, 54, 1, gdal.GDT_UInt16)
-            dataset.GetRasterBand(1).WriteArray(b1)
-            print("SAVED IMAGE imagem.tif")
+        x = last['index'][1] + 1
+        y = last['index'][0] + 1
+        bred = [it['values'][1] for it in arraylist]
+        array = np.array(bred)
+        # array.shape = (x, y)
+        data = np.resize(array, (y, x))
+        driver = gdal.GetDriverByName('GTiff')
+
+        # rescaled = (255.0 / b1.max() * (b1 - b1.min())).astype(np.uint8)
+
+        dataset = driver.Create("imagem2.tif", x, y, 1, gdal.GDT_UInt16)
+        dataset.GetRasterBand(1).WriteArray(data)
+        print("SAVED IMAGE imagem.tif")
+        # fabiano.morelli@cptec.inpe.br
+
+        connection.completeQuery(result.queryID)
+        connection.disconnect()
 
         return output
 
