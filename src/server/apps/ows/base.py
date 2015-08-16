@@ -7,8 +7,7 @@ from exception import InvalidParameterValue
 
 
 class XMLEncoder(object):
-    def __init__(self):
-        self._content_type = "application/xml"
+    _content_type = "application/xml"
 
     def serialize(self, tree, encoding='iso-8859-1'):
         if isinstance(tree, Element):

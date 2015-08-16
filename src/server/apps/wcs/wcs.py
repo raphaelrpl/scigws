@@ -14,7 +14,7 @@ from apps.ows.exception import MissingParameterValue, InvalidParameterValue
 class WCS(object):
     geo_array = None
     data = {}
-    bands_input = None
+    bands = None
     attributes = None
 
     def __init__(self, formats=[]):
@@ -75,7 +75,7 @@ class WCS(object):
         temp = filter(lambda b: b.replace(' ', ''), bands.split(','))
         geo_attr = self.geo_array.geoarrayattribute_set.filter(name__in=temp)
         if len(temp) == len(geo_attr):
-            self.bands_input = temp
+            self.bands = temp
             return temp
         raise InvalidRangeSubSet(msg="Invalid rangesubset %s" % temp)
 
@@ -115,8 +115,7 @@ class WCS(object):
             raise InvalidParameterValue("Invalid coverage with id \"%s\"" % "".join(coverageid), locator="coverageID", version="2.0.1")
         try:
             self.geo_array = GeoArray.objects.get(name=coverageid[0])
-            self.bands_input = [band.name for band in self.geo_array.geoarrayattribute_set.all()]
-            # subset_list = params.get('subset', [])
+            # self.bands_input = [band.name for band in self.geo_array.geoarrayattribute_set.all()]
             if subset:
                 subset = self._get_subset_from(subset)
             self.col_id = subset.get('col_id', {}).get('dimension', self.geo_array.get_x_dimension())
@@ -138,15 +137,17 @@ class WCS(object):
                                                             self.time_id[1])
 
             data = self.get_scidb_data(afl)
-            bands = self.attributes
+            # bands = self.attributes
+            self.bands = self.attributes
+
             if rangesubset:
-                bands = self._get_bands_from(rangesubset)
+                self._get_bands_from(rangesubset)
             self.data = {
                 "limits": [data[0]['index'], data[-1]['index']],
                 "values": {}
             }
 
-            for band_name in bands:
+            for band_name in self.bands:
                 index = self.attributes.index(band_name)
                 self.data['values'][band_name] = []
                 for values in data:

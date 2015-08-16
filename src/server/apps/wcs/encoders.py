@@ -155,7 +155,7 @@ class GetCoverageEncoder(WCSEncoder):
         row_id = wcs.row_id
         time_id = wcs.time_id
         geo = wcs.get_geo_array()
-        if self.params.get('format', 'gml').lower() != 'gml':
+        if self.params.get('format', ['gml'])[0].lower() == 'gml':
             bounded_by = GML_MAKER(
                 "boundedBy",
                 GML_MAKER(
@@ -202,9 +202,9 @@ class GetCoverageEncoder(WCSEncoder):
 
             # SciDB data
             time_series = ""
-            for i in xrange(len(wcs.data.values()[0])):
-                for attr_dict in wcs.bands_input:
-                    time_series += " %i" % wcs.data[attr_dict][i]
+            for i in xrange(len(wcs.data['values'].values()[0])):
+                for attr_dict in wcs.bands:
+                    time_series += " %i" % wcs.data['values'][attr_dict][i]
                 time_series = time_series.rstrip(" ") + ","
             time_series = time_series.rstrip(',')
 
@@ -235,13 +235,12 @@ class GetCoverageEncoder(WCSEncoder):
 
         import osgeo.gdal as gdal
         import numpy as np
-        # if output.get('red'):
 
         x = last[1] + 1
         y = last[0] + 1
         # 127.0.0.1:8000/ows/?service=WCS&request=GetCoverage&coverageid=mod09q1&subset=col_id(43200,43300)&subset=row_id(33600,33700)&subset=time_id(2000-02-18,2000-02-18)
 
-        band_quantity = len(wcs.bands_input)
+        band_quantity = len(wcs.bands)
 
         driver = gdal.GetDriverByName('GTiff')
         file_name = "bands_mod09q1.tif"

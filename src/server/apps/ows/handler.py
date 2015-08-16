@@ -2,7 +2,7 @@ from apps.wms.encoders import WMSGetCapabilitiesEnconder
 from apps.wms.wms import WMS
 from encoders import OWSExceptionResponse
 from exception import InvalidParameterValue
-from apps.wcs.encoders import GetCapabilitiesEncoder, DescribeCoverageEncoder, GetCoverageEncoder, WCSEncoder
+from apps.wcs.encoders import WCSEncoder
 from base import OWSDict
 
 
