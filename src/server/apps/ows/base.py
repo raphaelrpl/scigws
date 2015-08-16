@@ -7,6 +7,9 @@ from exception import InvalidParameterValue
 
 
 class XMLEncoder(object):
+    def __init__(self):
+        self._content_type = "application/xml"
+
     def serialize(self, tree, encoding='iso-8859-1'):
         if isinstance(tree, Element):
             return ElementTree.tostring(tree)
@@ -18,7 +21,11 @@ class XMLEncoder(object):
 
     @property
     def content_type(self):
-        return "application/xml"
+        return self._content_type
+
+    @content_type.setter
+    def content_type(self, value):
+        self._content_type = value
 
     def get_schema_locations(self):
         """ Interface method. It must retrieves a dict of schema locations """
@@ -29,6 +36,7 @@ class OWSDict(dict):
     _supported_services = ["wcs", "wms"]
     _supported_versions = ["2.0.0", "2.0.1", "1.3.0"]
     _supported_operations = ["getcapabilities", "describecoverage", "getcoverage", "getmap", "getfeatureinfo"]
+    ogc_params = {}
 
     def __init__(self, key_to_list_mapping):
         if isinstance(key_to_list_mapping, QueryDict):
@@ -67,21 +75,30 @@ class OWSDict(dict):
         self.coverage_id_formatter()
 
     def _is_valid_ows_request(self):
-        service = self.get('service', ' ')
+        service = self.get('service', ' ')[0]
         # service = service if isinstance(service, basestring) else service[0]
-        if service[0] not in self._supported_services:
+        if service not in self._supported_services:
             raise InvalidParameterValue("Invalid service name", locator="service")
-        version = self.get('version', ['2.0.1'])
-        if version[0] not in self._supported_versions:
+        version = self.get('version', ['2.0.1'])[0]
+        if version not in self._supported_versions:
             raise InvalidParameterValue("Invalid version name", locator="version")
-        request = self.get('request', ' ')
-        if request[0] not in self._supported_operations:
+        request = self.get('request', ' ')[0]
+        if request not in self._supported_operations:
             raise InvalidParameterValue("Invalid request name", locator="request")
+        self.ogc_params['service'] = service
+        self.ogc_params['version'] = version
+        self.ogc_params['request'] = request
+
+        # Remove ogc params from dict
+        self.pop('service')
+        if 'version' in self:
+            self.pop('version')
+        self.pop('request')
 
     def get_ows_request(self):
-        req = self.get('request', '')
-        service = self.get('service', '')
-        return req[0].lower(), service[0].lower() if req and service else None
+        req = self.ogc_params['request']
+        service = self.ogc_params['service']
+        return req, service if req and service else None
 
     def coverage_id_formatter(self):
         coverages = filter(bool, self.get('coverageid', []))

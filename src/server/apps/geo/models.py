@@ -32,6 +32,9 @@ class GeoArray(models.Model):
     def get_y_dimension(self):
         return [self.y_min, self.y_max]
 
+    def get_bands_names(self):
+        return self.geoarrayattribute_set.all()
+
     def get_lower(self, xmin=None, ymin=None, tmin=None):
         return "%s %s %s" % (xmin or self.x_min, ymin or self.y_min, tmin or self.geoarraytimeline_set.all().aggregate(
             time_point=models.Min('time_point')).get('time_point', 0))

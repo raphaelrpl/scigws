@@ -15,6 +15,7 @@ class WCS(object):
     geo_array = None
     data = {}
     bands_input = None
+    attributes = None
 
     def __init__(self, formats=[]):
         self.root_coverages_summary = WCS_MAKER("Contents")
@@ -82,86 +83,19 @@ class WCS(object):
     def get_scidb_data(cls, query, lang="AFL"):
         connection = SciDB(**DBConfig().get_scidb_credentials())
         result = connection.executeQuery(str(query), lang)
+        cls.attributes = connection.attributes
         print(query)
-        # a = connection.objects.to_array()
-        # import matplotlib.pyplot as plt
-        # plt.imsave("output.jpg", a)
-        desc = result.array.getArrayDesc()
-        attributes = desc.getAttributes()
-        attributes = [attributes[i] for i in range(attributes.size()) if attributes[i].getName() != "EmptyTag"]
-        attribute_iterators = [[attribute.getName(), attribute.getType(),
-                                result.array.getConstIterator(attribute.getId())] for attribute in attributes]
-        output = {}
-        dimensions = desc.getDimensions()
-        dnames = []
-        import matplotlib.pyplot as plt
-        # from matplotlib import cm
-        # import numpy as np
-        # h, w = 720, 720
-        # myarray = np.zeros((w, h))
 
-        # for i in range(dimensions.size()):
-        #     if dimensions[i].getBaseName() != "EmptyTag":
-        #         dnames.append(dimensions[i].getBaseName())
-
-        # print 1000
-        # pos = attribute_iterators[0][2].getPosition()
-        # first_x, first_y, first_t = pos[0], pos[1], pos[2]
-        # for iterator in attribute_iterators:
-        #     values = []
-        #     while not iterator[2].end():
-        #         value_iterator = iterator[2].getChunk().getConstIterator(
-        #             scidbapi.swig.ConstChunkIterator.IGNORE_OVERLAPS |
-        #             scidbapi.swig.ConstChunkIterator.IGNORE_EMPTY_CELLS)
-        #         # coordinates = value_iterator.getPosition()
-        #         while not value_iterator.end():
-        #             values.append(scidbapi.getTypedValue(value_iterator.getItem(), iterator[1]))
-        #             # myarray[720-1-coordinates[1]][coordinates[0]] = scidbapi.getTypedValue(
-        #             # value_iterator.getItem(), iterator[1])
-        #             # myarray[h-1-coordinates[1]][coordinates[0]] = value_iterator.getItem().getDouble()
-        #             # if ((coordinates[1]) < h) and (coordinates[0] < w):
-        #             #     myarray[h - 1 - coordinates[1]] = scidbapi.getTypedValue(value_iterator.getItem(), iterator[1])
-        #             value_iterator.increment_to_next()
-        #         try:
-        #             iterator[2].increment_to_next()
-        #         except StandardError:
-        #             pass
-        #     output[iterator[0]] = values
-        #
-        # pos2 = attribute_iterators[0][2].getPosition()
-        # last_x, last_y, last_t = pos[0], pos[1], pos[2]
         arraylist = []
 
         for res in connection.result_set:
             key, value = res
             arraylist.append({"index": key, "values": value})
 
-        first, last = arraylist[0], arraylist[-1]
-
-        # plt.imsave('teste0.png', myarray)
-        import osgeo.gdal as gdal
-        import numpy as np
-        # if output.get('red'):
-
-        x = last['index'][1] + 1
-        y = last['index'][0] + 1
-        bred = [it['values'][1] for it in arraylist]
-        array = np.array(bred)
-        # array.shape = (x, y)
-        data = np.resize(array, (y, x))
-        driver = gdal.GetDriverByName('GTiff')
-
-        # rescaled = (255.0 / b1.max() * (b1 - b1.min())).astype(np.uint8)
-
-        dataset = driver.Create("imagem2.tif", x, y, 1, gdal.GDT_UInt16)
-        dataset.GetRasterBand(1).WriteArray(data)
-        print("SAVED IMAGE imagem.tif")
-        # fabiano.morelli@cptec.inpe.br
-
         connection.completeQuery(result.queryID)
         connection.disconnect()
 
-        return output
+        return arraylist
 
     def describe_coverage(self, params):
         coverages_ids = params.get('coverageid', [])
@@ -172,17 +106,19 @@ class WCS(object):
         if not self.geo_arrays:
             raise NoSuchCoverageException()
 
-    def get_coverage(self, params):
-        coverage_id = params.get('coverageid', [])
-        if not coverage_id:
+    def get_coverage(self, coverageid, subset=None, rangesubset=None, format="GML", inputcrs=4236,
+                     outputcrs=4326):
+        # coverage_id = params.get('coverageid', [])
+        if not coverageid:
             raise MissingParameterValue("Missing coverageID parameter", locator="coverageID", version="2.0.1")
-        if len(coverage_id) > 1:
-            raise InvalidParameterValue("Invalid coverage with id \"%s\"" % "".join(coverage_id), locator="coverageID", version="2.0.1")
+        if len(coverageid) > 1:
+            raise InvalidParameterValue("Invalid coverage with id \"%s\"" % "".join(coverageid), locator="coverageID", version="2.0.1")
         try:
-            self.geo_array = GeoArray.objects.get(name=coverage_id[0])
+            self.geo_array = GeoArray.objects.get(name=coverageid[0])
             self.bands_input = [band.name for band in self.geo_array.geoarrayattribute_set.all()]
-            subset_list = params.get('subset', [])
-            subset = self._get_subset_from(subset_list)
+            # subset_list = params.get('subset', [])
+            if subset:
+                subset = self._get_subset_from(subset)
             self.col_id = subset.get('col_id', {}).get('dimension', self.geo_array.get_x_dimension())
             self.row_id = subset.get('row_id', {}).get('dimension', self.geo_array.get_y_dimension())
             time_id = subset.get('time_id', {}).get('dimension', self.geo_array.get_min_max_time())
@@ -201,14 +137,20 @@ class WCS(object):
                                                             self.time_id[0], self.col_id[1], self.row_id[1],
                                                             self.time_id[1])
 
-            # Get SciDB data - Time series
-            bands = params.get('rangesubset', [])
-            if bands:
-                bands = self._get_bands_from(bands)
             data = self.get_scidb_data(afl)
-            if data and bands:
-                data = {k: v for k, v in data.items() if k in bands}
-            self.data = data
+            bands = self.attributes
+            if rangesubset:
+                bands = self._get_bands_from(rangesubset)
+            self.data = {
+                "limits": [data[0]['index'], data[-1]['index']],
+                "values": {}
+            }
+
+            for band_name in bands:
+                index = self.attributes.index(band_name)
+                self.data['values'][band_name] = []
+                for values in data:
+                    self.data['values'][band_name].append(values['values'][index])
         except ObjectDoesNotExist:
             raise NoSuchCoverageException()
         except ValueError as e:

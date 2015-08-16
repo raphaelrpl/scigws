@@ -9,7 +9,12 @@ class OWSView(View):
         code = 200
         try:
             result = RequestHandler.handle(request)
-            return HttpResponse(result.serialize(result.encode(request)), content_type=result.content_type, status=code)
+            data = result.encode(request)
+            if result.content_type == "application/xml":
+                return HttpResponse(result.serialize(data),
+                                    content_type=result.content_type, status=code)
+            # It should be an image
+            return HttpResponse(open(data), content_type=result.content_type, status=code)
         except Exception as e:
             result, content_type = OWSExceptionHandler.handle(e)
             code = 400

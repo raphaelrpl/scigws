@@ -50,7 +50,7 @@ class WCSFactory(OWSFactory):
 
     @staticmethod
     def factory(params):
-        request = params.get('request', [''])[0]
+        request = params.ogc_params['request']
         for klass in type.__subclasses__(WCSEncoder):
             if klass.request.lower() == request:
                 return klass(params)
@@ -62,7 +62,7 @@ class WMSFactory(OWSFactory):
 
     @staticmethod
     def factory(params):
-        request = params.get('request', [''])[0]
+        request = params.ogc_params['request']
         if request == "getcapabilities":
             return WMSGetCapabilitiesEnconder(params)
         if request == "getmap":

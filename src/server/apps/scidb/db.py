@@ -105,6 +105,10 @@ class SciDB(scidbapi.Connection):
 
     def executeQuery(self, query, lang="afl"):
         result = super(SciDB, self).executeQuery(query, lang)
+        desc = result.array.getArrayDesc()
+        attributes = desc.getAttributes()
+        attributes = [attributes[i] for i in xrange(attributes.size()) if attributes[i].getName() != "EmptyTag"]
+        self.attributes = [attribute.getName() for attribute in attributes]
         self.result_set = SciDBResultSet(result)
             # self.objects[",".join([str(v) for v in key])] = value
 

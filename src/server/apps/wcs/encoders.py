@@ -150,82 +150,109 @@ class GetCoverageEncoder(WCSEncoder):
     def encode(self, request):
         nodes = []
         wcs = WCS()
-        wcs.get_coverage(self.params)
+        wcs.get_coverage(**self.params)
         col_id = wcs.col_id
         row_id = wcs.row_id
         time_id = wcs.time_id
         geo = wcs.get_geo_array()
-        bounded_by = GML_MAKER(
-            "boundedBy",
-            GML_MAKER(
-                "Envelope",
+        if self.params.get('format', 'gml').lower() != 'gml':
+            bounded_by = GML_MAKER(
+                "boundedBy",
                 GML_MAKER(
-                    "lowerCorner",
-                    geo.get_lower(xmin=col_id[0], ymin=row_id[0], tmin=time_id[0])
-                ),
-                GML_MAKER(
-                    "upperCorner",
-                    geo.get_upper(xmax=col_id[1], ymax=row_id[1], tmax=time_id[1])
-                ),
-                axisLabels=geo.get_axis_labels(),
-                srsDimension="3",
-                srsName="http://www.opengis.net/def/crs/EPSG/0/4326"
-            )
-        )
-
-        nodes.append(bounded_by)
-
-        domain_set = GML_MAKER(
-            "domainSet",
-            GML_MAKER(
-                "Grid",
-                GML_MAKER(
-                    "limits",
+                    "Envelope",
                     GML_MAKER(
-                        "GridEnvelope",
-                        GML_MAKER(
-                            "low",
-                            geo.get_lower()
-                        ),
-                        GML_MAKER(
-                            "high",
-                            geo.get_upper()
-                        ),
-                    )
-                ),
-                dimension="3"
-            )
-        )
-
-        nodes.append(domain_set)
-
-        # SciDB data
-        time_series = ""
-        for i in xrange(len(wcs.data.values()[0])):
-            for attr_dict in wcs.bands_input:
-                time_series += " %i" % wcs.data[attr_dict][i]
-            time_series = time_series.rstrip(" ") + ","
-        time_series = time_series.rstrip(',')
-
-        range_set = GML_MAKER(
-            "rangeSet",
-            GML_MAKER(
-                "DataBlock",
-                GML_MAKER(
-                    "tupleList",
-                    time_series,
-                    cs=" ",
-                    ts=","
+                        "lowerCorner",
+                        geo.get_lower(xmin=col_id[0], ymin=row_id[0], tmin=time_id[0])
+                    ),
+                    GML_MAKER(
+                        "upperCorner",
+                        geo.get_upper(xmax=col_id[1], ymax=row_id[1], tmax=time_id[1])
+                    ),
+                    axisLabels=geo.get_axis_labels(),
+                    srsDimension="3",
+                    srsName="http://www.opengis.net/def/crs/EPSG/0/4326"
                 )
             )
-        )
 
-        nodes.append(range_set)
+            nodes.append(bounded_by)
 
-        range_type = GMLCOV_MAKER("rangeType", SWEMeta.get_data_record(geo))
+            domain_set = GML_MAKER(
+                "domainSet",
+                GML_MAKER(
+                    "Grid",
+                    GML_MAKER(
+                        "limits",
+                        GML_MAKER(
+                            "GridEnvelope",
+                            GML_MAKER(
+                                "low",
+                                geo.get_lower()
+                            ),
+                            GML_MAKER(
+                                "high",
+                                geo.get_upper()
+                            ),
+                        )
+                    ),
+                    dimension="3"
+                )
+            )
 
-        nodes.append(range_type)
+            nodes.append(domain_set)
 
-        root = GMLCOV_MAKER("GridCoverage", *nodes, version="2.0.1")
+            # SciDB data
+            time_series = ""
+            for i in xrange(len(wcs.data.values()[0])):
+                for attr_dict in wcs.bands_input:
+                    time_series += " %i" % wcs.data[attr_dict][i]
+                time_series = time_series.rstrip(" ") + ","
+            time_series = time_series.rstrip(',')
 
-        return root
+            range_set = GML_MAKER(
+                "rangeSet",
+                GML_MAKER(
+                    "DataBlock",
+                    GML_MAKER(
+                        "tupleList",
+                        time_series,
+                        cs=" ",
+                        ts=","
+                    )
+                )
+            )
+
+            nodes.append(range_set)
+
+            range_type = GMLCOV_MAKER("rangeType", SWEMeta.get_data_record(geo))
+
+            nodes.append(range_type)
+
+            root = GMLCOV_MAKER("GridCoverage", *nodes, version="2.0.1")
+            return root
+
+        self.content_type = "application/tiff"
+        first, last = wcs.data['limits']
+
+        import osgeo.gdal as gdal
+        import numpy as np
+        # if output.get('red'):
+
+        x = last[1] + 1
+        y = last[0] + 1
+        # 127.0.0.1:8000/ows/?service=WCS&request=GetCoverage&coverageid=mod09q1&subset=col_id(43200,43300)&subset=row_id(33600,33700)&subset=time_id(2000-02-18,2000-02-18)
+
+        band_quantity = len(wcs.bands_input)
+
+        driver = gdal.GetDriverByName('GTiff')
+        file_name = "bands_mod09q1.tif"
+        dataset = driver.Create(file_name, x, y, band_quantity, gdal.GDT_UInt16)
+        # TODO: Should have another way
+        cont = 0
+        for band_name, band_values in wcs.data['values'].iteritems():
+            narray = np.array(band_values)
+            data = np.resize(narray, (y, x))
+            dataset.GetRasterBand(cont+1).WriteArray(data)
+            cont += 1
+            del data
+
+        return file_name
