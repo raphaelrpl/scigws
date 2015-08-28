@@ -155,7 +155,8 @@ class GetCoverageEncoder(WCSEncoder):
         row_id = wcs.row_id
         time_id = wcs.time_id
         geo = wcs.get_geo_array()
-        if self.params.get('format', ['gml'])[0].lower() == 'gml':
+        fmt = self.params.get('format', ['gml'])[0].lower()
+        if fmt == 'gml':
             bounded_by = GML_MAKER(
                 "boundedBy",
                 GML_MAKER(
@@ -230,28 +231,43 @@ class GetCoverageEncoder(WCSEncoder):
             root = GMLCOV_MAKER("GridCoverage", *nodes, version="2.0.1")
             return root
 
-        self.content_type = "application/tiff"
-        first, last = wcs.data['limits']
+        x = col_id[1] - col_id[0] + 1
+        y = row_id[1] - row_id[0] + 1
 
-        import osgeo.gdal as gdal
-        import numpy as np
+        if fmt == "image/tiff":
+            self.content_type = fmt
 
-        x = last[1] + 1
-        y = last[0] + 1
-        # 127.0.0.1:8000/ows/?service=WCS&request=GetCoverage&coverageid=mod09q1&subset=col_id(43200,43300)&subset=row_id(33600,33700)&subset=time_id(2000-02-18,2000-02-18)
+            import osgeo.gdal as gdal
 
-        band_quantity = len(wcs.bands)
+            # 127.0.0.1:8000/ows/?service=WCS&request=GetCoverage&coverageid=mod09q1&subset=col_id(43200,43300)&subset=row_id(33600,33700)&subset=time_id(2000-02-18,2000-02-18)
 
-        driver = gdal.GetDriverByName('GTiff')
-        file_name = "bands_mod09q1.tif"
-        dataset = driver.Create(file_name, x, y, band_quantity, gdal.GDT_UInt16)
-        # TODO: Should have another way
-        cont = 0
-        for band_name, band_values in wcs.data['values'].iteritems():
-            narray = np.array(band_values)
-            data = np.resize(narray, (y, x))
-            dataset.GetRasterBand(cont+1).WriteArray(data)
-            cont += 1
-            del data
+            band_quantity = len(wcs.bands)
 
-        return file_name
+            driver = gdal.GetDriverByName('GTiff')
+            file_name = "bands_mod09q1.tif"
+            dataset = driver.Create(file_name, x, y, band_quantity, gdal.GDT_UInt16)
+            # TODO: Should have another way
+            cont = 0
+            for band_name, band_values in wcs.data.iteritems():
+                # narray = np.array(band_values)
+                dataset.GetRasterBand(cont+1).WriteArray(band_values.reshape(y, x))
+                cont += 1
+            return file_name
+
+        elif fmt == "image/hdf":
+            self.content_type = fmt
+
+            import h5py
+
+            file_name = "data.h5"
+            h5f = h5py.File(file_name, 'w')
+
+            cont = 0
+            for band_name, band_values in wcs.data.iteritems():
+                # narray = np.array(band_values)
+                h5f.create_dataset('dataset_{}'.format(band_name), data=band_values.reshape(y, x))
+                cont += 1
+            h5f.close()
+            return file_name
+
+        raise MissingParameterValue(fmt)

@@ -80,21 +80,48 @@ class WCS(object):
         raise InvalidRangeSubSet(msg="Invalid rangesubset %s" % temp)
 
     @classmethod
-    def get_scidb_data(cls, query, lang="AFL"):
-        connection = SciDB(**DBConfig().get_scidb_credentials())
-        result = connection.executeQuery(str(query), lang)
-        cls.attributes = connection.attributes
-        print(query)
+    def get_scidb_data(cls, array_name, min_x, min_y, min_t,  max_x, max_y, max_t):
+        from scidbpy import connect
 
-        arraylist = []
+        sdb = connect('http://localhost:8080')
+        afl = sdb.afl
 
-        for res in connection.result_set:
-            key, value = res
-            arraylist.append({"index": key, "values": value})
+        data = afl.subarray(array_name, min_x, min_y, min_t, max_x, max_y, max_t)
+        cls.attributes = data.att_names
 
-        connection.completeQuery(result.queryID)
-        connection.disconnect()
+        return data
+        # query = afl.query(query)
+        # width = max_x - min_x + 1
+        # height = max_y - min_y + 1
 
+        # import osgeo.gdal as gdal
+        # driver = gdal.GetDriverByName('GTiff')
+        # file_name = "bands_mod09q1.tif"
+        # dataset = driver.Create(file_name, width, height, len(query.att_names), gdal.GDT_UInt16)
+        # matriz = query.toarray()
+        # cont = 0
+        # for band in query.att_names:
+        #     reshape = matriz[band].reshape(height, width)
+        #     dataset.GetRasterBand(cont+1).WriteArray(reshape)
+        #     cont += 1
+        #     # del reshape, arr
+        # print(query)
+
+
+        # connection = SciDB(**DBConfig().get_scidb_credentials())
+        # result = connection.executeQuery(str(query), lang)
+        # cls.attributes = connection.attributes
+        # print(query)
+        #
+        # arraylist = []
+        #
+        # for res in connection.result_set:
+        #     key, value = res
+        #     arraylist.append({"index": key, "values": value})
+        #
+        # connection.completeQuery(result.queryID)
+        # connection.disconnect()
+        return
         return arraylist
 
     def describe_coverage(self, params):
@@ -132,11 +159,14 @@ class WCS(object):
 
             self.time_id = [validator(t) for t in times_day_year]
 
-            afl = "subarray(%s, %s, %s, %s, %s, %s, %s)" % (self.geo_array.name, self.col_id[0], self.row_id[0],
+            # afl = "subarray(%s, %s, %s, %s, %s, %s, %s)" % (self.geo_array.name, self.col_id[0], self.row_id[0],
+            #                                                 self.time_id[0], self.col_id[1], self.row_id[1],
+            #                                                 self.time_id[1])
+
+            data = self.get_scidb_data(self.geo_array.name, self.col_id[0], self.row_id[0],
                                                             self.time_id[0], self.col_id[1], self.row_id[1],
                                                             self.time_id[1])
 
-            data = self.get_scidb_data(afl)
             # bands = self.attributes
             self.bands = self.attributes
 
@@ -147,11 +177,18 @@ class WCS(object):
                 "values": {}
             }
 
-            for band_name in self.bands:
-                index = self.attributes.index(band_name)
-                self.data['values'][band_name] = []
-                for values in data:
-                    self.data['values'][band_name].append(values['values'][index])
+            if len(self.bands) == 1:
+                self.data = {self.bands[0]: self.bands[0].toarray().toarray()}
+            else:
+                array = data.toarray()
+                self.data = {}
+
+                for band_name in self.bands:
+                    # index = self.attributes.index(band_name)
+                    self.data[band_name] = array[band_name]
+                    # self.data['values'][band_name] = []
+                    # for values in data:
+                    #     self.data['values'][band_name].append(values['values'][index])
         except ObjectDoesNotExist:
             raise NoSuchCoverageException()
         except ValueError as e:

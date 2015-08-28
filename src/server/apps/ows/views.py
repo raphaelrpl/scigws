@@ -14,7 +14,8 @@ class OWSView(View):
                 return HttpResponse(result.serialize(data),
                                     content_type=result.content_type, status=code)
             # It should be an image
-            return HttpResponse(open(data), content_type=result.content_type, status=code)
+            with open(data) as f:
+                return HttpResponse(f.read(), content_type=result.content_type, status=code)
         except Exception as e:
             result, content_type = OWSExceptionHandler.handle(e)
             code = 400
