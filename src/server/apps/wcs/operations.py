@@ -1,94 +1,134 @@
-from apps.ows.encoders import OWSEncoder
-from apps.ows.ows import OWSMeta
-from apps.ows.exception import MissingParameterValue
+from collections import defaultdict
 from apps.swe.swe import SWEMeta
-from utils import WCS_MAKER, wcs_set, WCSEO_MAKER
+from apps.ows.base import XMLEncoder
+from apps.wcs.base import ImageEncoder
+from utils import WCS_MAKER, WCSEO_MAKER
+from apps.ows.ows import OWSMeta
 from apps.wcs.wcs import WCS
 from apps.gml.utils import GML_MAKER, GMLCOV_MAKER, namespace_gml
+from apps.geo.models import GeoArrayTimeLine, GeoArray
+from apps.ows.base import Operation
+
+from scidbpy import connect
 
 
-class WCSEncoder(OWSEncoder):
-    request = ""
+class WCSOperation(Operation):
+    """
 
-    def __init__(self, params):
+    _scidb: It's instance of SciDBShimInterface
+    :params: It is OWSDict that contains request params
+
+    """
+    _scidb = None
+    params = None
+
+    def __init__(self, params, encoder_type):
+        super(WCSOperation, self).__init__(encoder_type)
         self.params = params
-
-    def get_schema_locations(self):
-        return wcs_set.schema_locations
+        self._scidb = connect()
 
 
-class GetCapabilitiesEncoder(WCSEncoder):
-    request = "getcapabilities"
+class GetCapabilities(WCSOperation):
+    _operation_name = "getcapabilities"
 
-    def encode(self, request):
+    def __init__(self, params, encoding="utf-8"):
+        super(GetCapabilities, self).__init__(params, XMLEncoder(encoding=encoding))
+
+    def process(self, request):
         nodes = []
+
         ows = OWSMeta(url=request.build_absolute_uri().split('?')[0] + "?")
 
         nodes.append(ows.root_identification)
         nodes.append(ows.root_provider)
         nodes.append(ows.root_operations)
 
-        wcs = WCS(formats=ows.formats)
-
         root_service_metadata = WCS_MAKER("ServiceMetadata")
-        formats = [WCS_MAKER("formatSupported", f.get('name')) for f in ows.formats]
+
+        # Supported formats
+        formats = [WCS_MAKER("formatSupported", f.content_type) for f in type.__subclasses__(ImageEncoder)]
+        formats.append(WCS_MAKER('formatSupported', 'application/xml'))
         root_service_metadata.extend(formats)
 
         nodes.append(root_service_metadata)
 
+        # Get Coverage Summary
+        root_coverages_summary = WCS_MAKER("Contents")
+        root_coverages_summary.extend([
+            WCS_MAKER(
+                "CoverageSummary",
+                WCS_MAKER(
+                    "CoverageId",
+                    coverage.name
+                ),
+                WCS_MAKER(
+                    "CoverageSubtype",
+                    "GridCoverage"
+                )
+            )
+            for coverage in GeoArray.objects.all()
+        ])
+
+        # Get Times
+        arrays_time = GeoArrayTimeLine.objects.all().order_by('id')
+
+        times = defaultdict(list)
+        for time in arrays_time:
+            times[time.array.name].append(time)
+
         wcseo_times = [
             WCSEO_MAKER(
                 "DatasetSeriesSummary",
-                WCSEO_MAKER("DatasetSeriesId", geo_array.name),
+                WCSEO_MAKER("DatasetSeriesId", geo_array),
                 GML_MAKER(
                     "TimePeriod",
                     GML_MAKER(
                         "beginPosition",
-                        wcs.times[geo_array][0].date.strftime("%Y-%m-%dT%H:%M:%S")
+                        times[geo_array][0].date.strftime("%Y-%m-%dT%H:%M:%S")
                     ),
                     GML_MAKER(
                         "endPosition",
-                        wcs.times[geo_array][-1].date.strftime("%Y-%m-%dT%H:%M:%S")
+                        times[geo_array][-1].date.strftime("%Y-%m-%dT%H:%M:%S")
                     ),
-                    GML_MAKER("timeInterval", str(geo_array.t_resolution)),
-                    **{namespace_gml('id'): geo_array.name}
+                    GML_MAKER("timeInterval", str(times[geo_array][0].array.t_resolution)),
+                    **{namespace_gml('id'): geo_array}
                 )
             )
-            for geo_array in wcs.times
+            for geo_array in times
         ]
 
         extension = WCS_MAKER("Extension")
         extension.extend(wcseo_times)
 
-        contents = wcs.root_coverages_summary
+        contents = root_coverages_summary
         contents.append(extension)
 
         nodes.append(contents)
+        root = WCS_MAKER("Capabilities", version="2.0.1")
+        root.extend(nodes)
 
-        root = WCS_MAKER("Capabilities", *nodes, version="2.0.1")
-
-        return root
+        self._encoder.set_root(root)
 
 
-class DescribeCoverageEncoder(WCSEncoder):
-    request = "describecoverage"
+class DescribeCoverage(WCSOperation):
+    """
+    DescribeCoverage operation: It has XMLEncoder by default
+    """
 
-    def __init__(self, params):
-        if not params.get('coverageid', []):
-            raise MissingParameterValue("Missing parameter coverageID", locator="coverageID")
-        super(DescribeCoverageEncoder, self).__init__(params)
+    _operation_name = "describecoverage"
 
-    def encode(self, request):
-        nodes = []
+    def __init__(self, params, encoding="utf-8"):
+        super(DescribeCoverage, self).__init__(params, XMLEncoder(encoding=encoding))
 
+    def process(self, request):
         wcs = WCS()
         wcs.describe_coverage(self.params)
 
         coverages = []
 
-        for coverage in self.params.get('coverageid'):
-            geo = wcs.get_geo_array(coverage)
-            time_periods = geo.get_min_max_time()
+        for coverage in wcs.geo_arrays:
+            # geo = wcs.get_geo_array(coverage)
+            time_periods = coverage.get_min_max_time()
             coverage_description = WCS_MAKER(
                 "CoverageDescription",
                 GML_MAKER(
@@ -97,18 +137,18 @@ class DescribeCoverageEncoder(WCSEncoder):
                         "Envelope",
                         GML_MAKER(
                             "lowerCorner",
-                            geo.get_lower()
+                            coverage.get_lower()
                         ),
                         GML_MAKER(
                             "upperCorner",
-                            geo.get_upper()
+                            coverage.get_upper()
                         ),
-                        axisLabels=geo.get_axis_labels(),
+                        axisLabels=coverage.get_axis_labels(),
                         srsDimension="3",
                         srsName="http://www.opengis.net/def/crs/EPSG/0/4326"
                     )
                 ),
-                WCS_MAKER("CoverageId", geo.name),
+                WCS_MAKER("CoverageId", coverage.name),
                 GML_MAKER(
                     "domainSet",
                     GML_MAKER(
@@ -117,8 +157,8 @@ class DescribeCoverageEncoder(WCSEncoder):
                             "limits",
                             GML_MAKER(
                                 "GridEnvelope",
-                                GML_MAKER("low", geo.get_lower()),
-                                GML_MAKER("high", geo.get_upper())
+                                GML_MAKER("low", coverage.get_lower()),
+                                GML_MAKER("high", coverage.get_upper())
                             )
                         ),
                         dimension="3"
@@ -128,35 +168,60 @@ class DescribeCoverageEncoder(WCSEncoder):
                     "TimePeriod",
                     GML_MAKER("beginPosition", time_periods[0]),
                     GML_MAKER("endPosition", time_periods[-1]),
-                    GML_MAKER("timeInterval", str(geo.t_resolution))
+                    GML_MAKER("timeInterval", str(coverage.t_resolution))
                 ),
                 GMLCOV_MAKER(
                     "rangeType",
-                    SWEMeta.get_data_record(geo)
+                    SWEMeta.get_data_record(coverage)
                 ),
-                id=coverage
+                id=coverage.name
             )
             coverages.append(coverage_description)
-
-        root = WCS_MAKER("CoverageDescriptions", *nodes, version="2.0.1")
+        root = WCS_MAKER("CoverageDescriptions", version="2.0.1")
         root.extend(coverages)
+        self._encoder.set_root(root)
 
-        return root
 
+class GetCoverage(WCSOperation):
+    _operation_name = "getcoverage"
 
-class GetCoverageEncoder(WCSEncoder):
-    request = "getcoverage"
+    def __init__(self, params):
+        # Check if it has image response or xml response
+        default_format = "application/xml"
+        fmt = params.get('format', ' ')[0].lower()
+        if fmt == default_format:
+            encoder = XMLEncoder()
+        else:
+            for klass in type.__subclasses__(ImageEncoder):
+                if klass.content_type == fmt:
+                    encoder = klass()
+                    break
+            else:
+                raise TypeError("Invalid wcs format input")
 
-    def encode(self, request):
-        nodes = []
+        super(GetCoverage, self).__init__(params, encoder)
+
+    def process(self, request):
         wcs = WCS()
         wcs.get_coverage(**self.params)
-        col_id = wcs.col_id
-        row_id = wcs.row_id
-        time_id = wcs.time_id
-        geo = wcs.get_geo_array()
-        fmt = self.params.get('format', ['gml'])[0].lower()
-        if fmt == 'gml':
+        if isinstance(self._encoder, ImageEncoder):
+            # Get X and Y
+            col_id = wcs.col_id
+            row_id = wcs.row_id
+            x = col_id[1] - col_id[0] + 1
+            y = row_id[1] - row_id[0] + 1
+
+            # Bands size
+            band_size = len(wcs.bands)
+
+            # Generate image and save temporarily
+            self._encoder.generate_image_on_disk(wcs, x=x, y=y, band_size=band_size)
+        else:
+            nodes = []
+            col_id = wcs.col_id
+            row_id = wcs.row_id
+            time_id = wcs.time_id
+            geo = wcs.get_geo_array()
             bounded_by = GML_MAKER(
                 "boundedBy",
                 GML_MAKER(
@@ -229,44 +294,4 @@ class GetCoverageEncoder(WCSEncoder):
             nodes.append(range_type)
 
             root = GMLCOV_MAKER("GridCoverage", *nodes, version="2.0.1")
-            return root
-
-        x = col_id[1] - col_id[0] + 1
-        y = row_id[1] - row_id[0] + 1
-
-        if fmt == "image/tiff":
-            self.content_type = fmt
-
-            import osgeo.gdal as gdal
-
-            # 127.0.0.1:8000/ows/?service=WCS&request=GetCoverage&coverageid=mod09q1&subset=col_id(43200,43300)&subset=row_id(33600,33700)&subset=time_id(2000-02-18,2000-02-18)
-
-            band_quantity = len(wcs.bands)
-
-            driver = gdal.GetDriverByName('GTiff')
-            file_name = "bands_mod09q1.tif"
-            dataset = driver.Create(file_name, x, y, band_quantity, gdal.GDT_UInt16)
-            # TODO: Should have another way
-            cont = 0
-            for band_name, band_values in wcs.data.iteritems():
-                dataset.GetRasterBand(cont+1).WriteArray(band_values.reshape(y, x))
-                cont += 1
-            return file_name
-
-        elif fmt == "image/hdf":
-            self.content_type = fmt
-
-            import h5py
-
-            file_name = "data.h5"
-            h5f = h5py.File(file_name, 'w')
-
-            cont = 0
-            for band_name, band_values in wcs.data.iteritems():
-                h5f.create_dataset('dataset_{}'.format(band_name), data=band_values.reshape(y, x))
-                cont += 1
-            h5f.close()
-
-            return file_name
-
-        raise MissingParameterValue(fmt)
+            self._encoder.set_root(root)

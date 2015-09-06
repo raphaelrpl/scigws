@@ -8,18 +8,14 @@ class OWSView(View):
     def process_request(self, request):
         code = 200
         try:
-            result = RequestHandler.handle(request)
-            data = result.encode(request)
-            if result.content_type == "application/xml":
-                return HttpResponse(result.serialize(data),
-                                    content_type=result.content_type, status=code)
-            # It should be an image
-            with open(data) as f:
-                return HttpResponse(f.read(), content_type=result.content_type, status=code)
+            operation = RequestHandler.handle(request)
+            # Set value to encoder and prepare it to be serialized
+            operation.process(request)
+            return HttpResponse(operation.response().serialize(), content_type=operation.response().content_type, status=code)
         except Exception as e:
-            result, content_type = OWSExceptionHandler.handle(e)
+            exception = OWSExceptionHandler.handle(e)
             code = 400
-            return HttpResponse(result, content_type=content_type, status=code)
+            return HttpResponse(exception.serialize(), content_type=exception.content_type, status=code)
 
     def get(self, request):
         return self.process_request(request)

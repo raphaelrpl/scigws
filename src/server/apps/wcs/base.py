@@ -1,9 +1,46 @@
 from xml.etree import ElementTree
 from exception import WCSException
 from json import loads
-from psycopg2 import connect
+from apps.ows.base import ImageEncoder
+from datetime import datetime
 
 import abc
+import h5py
+import osgeo.gdal as gdal
+
+
+class HDFEncoder(ImageEncoder):
+    content_type = "image/hdf"
+
+    def generate_image_on_disk(self, wcs, x, y, band_size):
+        times = wcs.geo_array.get_min_max_time()
+        self.file_name = "{}_mod09q1_{}_{}.h5".format(datetime.now().strftime("%d-%M-%Y"),
+                                                       times[0][:10],
+                                                       times[1][:10])
+        h5f = h5py.File(self.file_name, 'w')
+
+        cont = 0
+        for band_name, band_values in wcs.data.iteritems():
+            h5f.create_dataset('dataset_{}'.format(band_name), data=band_values.reshape(y, x))
+            cont += 1
+        h5f.close()
+
+
+class TIFFEncoder(ImageEncoder):
+    content_type = "image/tiff"
+
+    def generate_image_on_disk(self, wcs, x, y, band_size):
+        driver = gdal.GetDriverByName('GTiff')
+        times = wcs.geo_array.get_min_max_time()
+        self.file_name = "{}_mod09q1_{}_{}.tif".format(datetime.now().strftime("%d-%M-%Y"),
+                                                  times[0][:10],
+                                                  times[1][:10])
+        dataset = driver.Create(self.file_name, x, y, band_size, gdal.GDT_UInt16)
+        # TODO: Should have another way
+        cont = 0
+        for band_name, band_values in wcs.data.iteritems():
+            dataset.GetRasterBand(cont+1).WriteArray(band_values.reshape(y, x))
+            cont += 1
 
 
 class WCSBase(object):

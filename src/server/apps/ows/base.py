@@ -4,32 +4,85 @@ from django.http.request import QueryDict
 from lxml import etree
 from utils import namespace_xsi
 from exception import InvalidParameterValue
+from abc import ABCMeta, abstractmethod
 
 
-class XMLEncoder(object):
-    _content_type = "application/xml"
+class OWSEncoder(object):
+    content_type = None
 
-    def serialize(self, tree, encoding='iso-8859-1'):
-        if isinstance(tree, Element):
-            return ElementTree.tostring(tree)
+    def serialize(self):
+        pass
+
+
+class XMLEncoder(OWSEncoder):
+    content_type = "application/xml"
+    _tree = None
+    _encoding = None
+
+    def __init__(self, tree=None, encoding='utf-8'):
+        self._tree = tree
+        self._encoding = encoding
+
+    def set_root(self, tree):
+        if self._tree:
+            del self._tree
+        self._tree = tree
+
+    def serialize(self):
+        if isinstance(self._tree, Element):
+            return ElementTree.tostring(self._tree)
+        elif self._tree is None:
+            raise ValueError("Tree node is None")
         schema_locations = self.get_schema_locations()
-        tree.attrib[namespace_xsi("schemaLocation")] = " ".join("%s %s" % (uri, loc)
+        self._tree.attrib[namespace_xsi("schemaLocation")] = " ".join("%s %s" % (uri, loc)
                                                                 for uri, loc in schema_locations.items())
 
-        return etree.tostring(tree, pretty_print=True, encoding=encoding)
-
-    @property
-    def content_type(self):
-        return self._content_type
-
-    @content_type.setter
-    def content_type(self, value):
-        self._content_type = value
+        return etree.tostring(self._tree, pretty_print=True, encoding=self._encoding)
 
     def get_schema_locations(self):
         """ Interface method. It must retrieves a dict of schema locations """
         return {}
 
+
+class ImageEncoder(OWSEncoder):
+    # It must to have format name. i.e "image/tiff"
+    file_name = None
+    data = []
+
+    def serialize(self):
+        with open(self.file_name, 'r') as f:
+            data = f.read()
+        return data
+
+    def set_data(self, data):
+        if self.data:
+            del self.data
+        self.data = data
+
+    def generate_image_on_disk(self, wcs, x, y, bands_size):
+        pass
+
+
+class Operation(object):
+    _encoder = None
+    _operation_name = None
+
+    def __init__(self, encoder_class):
+        for klass in type.__subclasses__(OWSEncoder):
+            if isinstance(encoder_class, klass):
+                break
+        else:
+            raise TypeError("Invalid class type for encoder. It must be subclass of ...")
+        #
+        # if not issubclass(encoder_class, OWSEncoder):
+        #     raise TypeError("Invalid class type for encoder. It must be subclass of ...")
+        self._encoder = encoder_class
+
+    def process(self, request):
+        raise NotImplementedError("It must be implemented")
+
+    def response(self):
+        return self._encoder
 
 class OWSDict(dict):
     _supported_services = ["wcs", "wms"]

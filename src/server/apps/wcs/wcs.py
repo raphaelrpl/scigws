@@ -6,9 +6,15 @@ from utils import WCS_MAKER
 from validators import DateToPoint
 from validators import is_valid_url
 from apps.geo.models import GeoArrayTimeLine, GeoArray
-from apps.ows.utils import DBConfig
 from collections import defaultdict
 from apps.ows.exception import MissingParameterValue, InvalidParameterValue
+
+
+# Try import TerralibPy
+try:
+    import terralib
+except ImportError:
+    terralib = None
 
 
 class WCS(object):
@@ -135,14 +141,12 @@ class WCS(object):
 
     def get_coverage(self, coverageid, subset=None, rangesubset=None, format="GML", inputcrs=4236,
                      outputcrs=4326):
-        # coverage_id = params.get('coverageid', [])
         if not coverageid:
             raise MissingParameterValue("Missing coverageID parameter", locator="coverageID", version="2.0.1")
         if len(coverageid) > 1:
             raise InvalidParameterValue("Invalid coverage with id \"%s\"" % "".join(coverageid), locator="coverageID", version="2.0.1")
         try:
             self.geo_array = GeoArray.objects.get(name=coverageid[0])
-            # self.bands_input = [band.name for band in self.geo_array.geoarrayattribute_set.all()]
             if subset:
                 subset = self._get_subset_from(subset)
             self.col_id = subset.get('col_id', {}).get('dimension', self.geo_array.get_x_dimension())
