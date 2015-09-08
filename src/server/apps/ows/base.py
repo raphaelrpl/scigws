@@ -87,7 +87,7 @@ class ImageEncoder(OWSEncoder):
             processes.append(process)
             process.start()
 
-        self.generate_image_on_disk(wcs.geo_array, queue, x * fact, y, len(wcs.attributes))
+        self.generate_image_on_disk(wcs.geo_array, queue, x, y * fact, len(wcs.attributes))
 
         # Close the processes
         for process in processes:
