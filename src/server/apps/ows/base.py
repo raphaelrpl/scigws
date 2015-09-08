@@ -4,7 +4,7 @@ from django.http.request import QueryDict
 from lxml import etree
 from utils import namespace_xsi
 from exception import InvalidParameterValue
-from abc import ABCMeta, abstractmethod
+import multiprocessing
 
 
 class OWSEncoder(object):
@@ -59,8 +59,45 @@ class ImageEncoder(OWSEncoder):
             del self.data
         self.data = data
 
-    def generate_image_on_disk(self, wcs, x, y, bands_size):
-        pass
+    def _func(self, band_name, data, x, y, shared_variable):
+        """
+        :param data: scidbpy.SciDBArray -> It is result of scidbapy query
+        :param x: int -> Width image size
+        :param y: int -> Height image size
+        :param shared_variable: Queue -> Shared Object
+        """
+        shared_variable.put((band_name, data.reshape(x, y)))
+
+    def process_data(self, wcs, x, y, fact):
+        """
+        :type data: scidbpy.SciDBArray
+        :type x: int
+        :type y: int
+        :return multiprocessing.Queue
+        """
+        # Default parallel mode for working with large data. It can be override by yours algorithms
+        # processes = []
+        queue = multiprocessing.Manager().Queue()
+        # pool = multiprocessing.Pool(processes=len(wcs.attributes))
+        processes = []
+
+        for band in wcs.attributes:
+            # pool.apply_async(self._func, (band, wcs.data[band], x, y * fact, queue))
+            process = multiprocessing.Process(target=self._func, args=(band, wcs.data[band], x, y * fact, queue,))
+            processes.append(process)
+            process.start()
+
+        self.generate_image_on_disk(wcs.geo_array, queue, x * fact, y, len(wcs.attributes))
+
+        # Close the processes
+        for process in processes:
+            process.join(1)
+        print("FOI")
+        #
+        return queue
+
+    def generate_image_on_disk(self, metadata, data, x, y, bands_size):
+        raise NotImplementedError("It must be implemented with saving file role")
 
 
 class Operation(object):

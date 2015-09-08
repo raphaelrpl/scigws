@@ -22,6 +22,7 @@ class WCS(object):
     data = {}
     bands = None
     attributes = None
+    query = None
 
     def __init__(self, formats=[]):
         self.root_coverages_summary = WCS_MAKER("Contents")
@@ -96,39 +97,6 @@ class WCS(object):
         cls.attributes = data.att_names
 
         return data
-        # query = afl.query(query)
-        # width = max_x - min_x + 1
-        # height = max_y - min_y + 1
-
-        # import osgeo.gdal as gdal
-        # driver = gdal.GetDriverByName('GTiff')
-        # file_name = "bands_mod09q1.tif"
-        # dataset = driver.Create(file_name, width, height, len(query.att_names), gdal.GDT_UInt16)
-        # matriz = query.toarray()
-        # cont = 0
-        # for band in query.att_names:
-        #     reshape = matriz[band].reshape(height, width)
-        #     dataset.GetRasterBand(cont+1).WriteArray(reshape)
-        #     cont += 1
-        #     # del reshape, arr
-        # print(query)
-
-
-        # connection = SciDB(**DBConfig().get_scidb_credentials())
-        # result = connection.executeQuery(str(query), lang)
-        # cls.attributes = connection.attributes
-        # print(query)
-        #
-        # arraylist = []
-        #
-        # for res in connection.result_set:
-        #     key, value = res
-        #     arraylist.append({"index": key, "values": value})
-        #
-        # connection.completeQuery(result.queryID)
-        # connection.disconnect()
-        return
-        return arraylist
 
     def describe_coverage(self, params):
         coverages_ids = params.get('coverageid', [])
@@ -163,11 +131,7 @@ class WCS(object):
 
             self.time_id = [validator(t) for t in times_day_year]
 
-            # afl = "subarray(%s, %s, %s, %s, %s, %s, %s)" % (self.geo_array.name, self.col_id[0], self.row_id[0],
-            #                                                 self.time_id[0], self.col_id[1], self.row_id[1],
-            #                                                 self.time_id[1])
-
-            data = self.get_scidb_data(self.geo_array.name, self.col_id[0], self.row_id[0],
+            self.query = self.get_scidb_data(self.geo_array.name, self.col_id[0], self.row_id[0],
                                                             self.time_id[0], self.col_id[1], self.row_id[1],
                                                             self.time_id[1])
 
@@ -176,23 +140,16 @@ class WCS(object):
 
             if rangesubset:
                 self._get_bands_from(rangesubset)
-            self.data = {
-                "limits": [data[0]['index'], data[-1]['index']],
-                "values": {}
-            }
 
-            if len(self.bands) == 1:
-                self.data = {self.bands[0]: self.bands[0].toarray().toarray()}
-            else:
-                array = data.toarray()
-                self.data = {}
+            # if len(self.bands) == 1:
+            self.data = self.query.toarray()
+            # else:
+            #     array = data.toarray()
+            #     self.data = {}
+            #
+            #     for band_name in self.bands:
+            #         self.data[band_name] = array[band_name]
 
-                for band_name in self.bands:
-                    # index = self.attributes.index(band_name)
-                    self.data[band_name] = array[band_name]
-                    # self.data['values'][band_name] = []
-                    # for values in data:
-                    #     self.data['values'][band_name].append(values['values'][index])
         except ObjectDoesNotExist:
             raise NoSuchCoverageException()
         except ValueError as e:

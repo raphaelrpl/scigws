@@ -10,6 +10,7 @@ from apps.geo.models import GeoArrayTimeLine, GeoArray
 from apps.ows.base import Operation
 
 from scidbpy import connect
+import numpy as np
 
 
 class WCSOperation(Operation):
@@ -205,17 +206,25 @@ class GetCoverage(WCSOperation):
         wcs = WCS()
         wcs.get_coverage(**self.params)
         if isinstance(self._encoder, ImageEncoder):
+            # It should be an image
+
             # Get X and Y
             col_id = wcs.col_id
             row_id = wcs.row_id
             x = col_id[1] - col_id[0] + 1
             y = row_id[1] - row_id[0] + 1
 
+            # Calculate the factor if there are 3d dimension. Multiply Y axis by default
+            fact = wcs.time_id[-1] - wcs.time_id[0] + 1
+
+            # Let parallel reshape save
+            self._encoder.process_data(wcs, x, y, fact)
+
             # Bands size
-            band_size = len(wcs.bands)
+            # band_size = len(wcs.bands)
 
             # Generate image and save temporarily
-            self._encoder.generate_image_on_disk(wcs, x=x, y=y, band_size=band_size)
+            # self._encoder.generate_image_on_disk(wcs.geo_array, enc, x=x, y=y, band_size=band_size)
         else:
             nodes = []
             col_id = wcs.col_id
@@ -267,12 +276,13 @@ class GetCoverage(WCSOperation):
             nodes.append(domain_set)
 
             # SciDB data
-            time_series = ""
-            for i in xrange(len(wcs.data['values'].values()[0])):
-                for attr_dict in wcs.bands:
-                    time_series += " %i" % wcs.data['values'][attr_dict][i]
-                time_series = time_series.rstrip(" ") + ","
-            time_series = time_series.rstrip(',')
+            time_series = []
+
+            # a = [" ".join(x.tolist()) for x in np.hstack((wcs.data.T.real, wcs.data.T.imag)).flat]
+
+            # Stack array splitting by z dimension and then, uses flat to iterate over all
+            for i in np.hstack(wcs.data.T.real).T.flat:
+                time_series.append(" ".join(map(str, i.tolist())))
 
             range_set = GML_MAKER(
                 "rangeSet",
@@ -280,7 +290,7 @@ class GetCoverage(WCSOperation):
                     "DataBlock",
                     GML_MAKER(
                         "tupleList",
-                        time_series,
+                        ",".join(time_series),
                         cs=" ",
                         ts=","
                     )
