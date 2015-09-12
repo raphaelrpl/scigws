@@ -7,6 +7,10 @@ import numpy as np
 
 sys.path.append(os.path.join('/opt/scidb/%s' % SCIDB_VERSION, 'lib'))
 import scidbapi
+import numpy as np
+
+from multiprocessing import Process, Queue
+from Queue import Empty
 
 
 class SciDBResultSet:
@@ -103,15 +107,84 @@ class SciDB(scidbapi.Connection):
         except Exception as error:
             raise SciDBConnectionError(error)
 
+    def _parallel_getter_object(self, attribute, shared_object):
+        array = []
+        currentchunk = attribute[1].getChunk()
+        chunkiter = currentchunk.getConstIterator(
+            (
+                scidbapi.swig.ConstChunkIterator.IGNORE_OVERLAPS) |
+            (
+                scidbapi.swig.ConstChunkIterator.IGNORE_EMPTY_CELLS))
+
+        while not chunkiter.end():
+            if not chunkiter.isEmpty():
+                dataitem = chunkiter.getItem()
+                array.append(scidbapi.getTypedValue(dataitem, attribute[2]))
+            chunkiter.increment_to_next()
+        # Putting array in queue (shared object - concurrency?)
+        print("Done -> {}".format(len(array)))
+        shared_object.put(
+            (
+                (attribute[0], attribute[2]),
+                array
+            )
+        )
+
     def executeQuery(self, query, lang="afl"):
         result = super(SciDB, self).executeQuery(query, lang)
         desc = result.array.getArrayDesc()
-        attributes = desc.getAttributes()
-        attributes = [attributes[i] for i in xrange(attributes.size()) if attributes[i].getName() != "EmptyTag"]
-        self.attributes = [attribute.getName() for attribute in attributes]
-        self.result_set = SciDBResultSet(result)
+        # attributes = desc.getAttributes()
+        # attributes = [attributes[i] for i in xrange(attributes.size()) if attributes[i].getName() != "EmptyTag"]
+        # self.attributes = [attribute.getName() for attribute in attributes]
+        # self.result_set = SciDBResultSet(result)
             # self.objects[",".join([str(v) for v in key])] = value
 
+        attrs = desc.getAttributes()
+
+        iters = []
+
+        processes = []
+
+        attributes = [(attrs[i].getName(), result.array.getConstIterator(i), attrs[i].getType()) for i in xrange(
+            attrs.size()) if attrs[i].getName() != "EmptyTag"]
+        # queue = Queue()
+
+        import datetime
+        import numpy as np
+        start = datetime.datetime.now()
+
+        output = []
+        types = []
+        queues = []
+        while not attributes[0][1].end():
+            for i in xrange(len(attributes)):
+                queue = Queue()
+                process = Process(target=self._parallel_getter_object, args=(attributes[i], queue))
+                processes.append(process)
+                process.start()
+                queues.append(queue)
+
+            for queue in queues:
+                band, values = queue.get()
+                types.append(band)
+                output.append(tuple(values))
+
+            for i in xrange(len(attributes)):
+                processes[i].join()
+
+            for i in xrange(len(attributes)):
+                attributes[i][1].increment_to_next()
+
+        end = datetime.datetime.now() - start
+        print(str(end))
+
+        print("Output -> {} \n{}".format(len(output), map(len, output)))
+        print(types)
+
+        # dtype = np.dtype(types)
+        # print(output)
+        # array = np.array(output, dtype=dtype)
+        # print(array.size)
         return result
 
     def __del__(self):
