@@ -73,16 +73,14 @@ class ImageEncoder(OWSEncoder):
         :type data: scidbpy.SciDBArray
         :type x: int
         :type y: int
+        :type fact: int
         :return multiprocessing.Queue
         """
         # Default parallel mode for working with large data. It can be override by yours algorithms
-        # processes = []
         queue = multiprocessing.Manager().Queue()
-        # pool = multiprocessing.Pool(processes=len(wcs.attributes))
         processes = []
 
         for band in wcs.attributes:
-            # pool.apply_async(self._func, (band, wcs.data[band], x, y * fact, queue))
             process = multiprocessing.Process(target=self._func, args=(band, wcs.data[band], x, y * fact, queue,))
             processes.append(process)
             process.start()
@@ -92,8 +90,7 @@ class ImageEncoder(OWSEncoder):
         # Close the processes
         for process in processes:
             process.join(1)
-        print("FOI")
-        #
+
         return queue
 
     def generate_image_on_disk(self, metadata, data, x, y, bands_size):

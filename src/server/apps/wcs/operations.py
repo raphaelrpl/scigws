@@ -205,12 +205,12 @@ class GetCoverage(WCSOperation):
     def process(self, request):
         wcs = WCS()
         wcs.get_coverage(**self.params)
+        col_id = wcs.col_id
+        row_id = wcs.row_id
         if isinstance(self._encoder, ImageEncoder):
             # It should be an image
 
             # Get X and Y
-            col_id = wcs.col_id
-            row_id = wcs.row_id
             x = col_id[1] - col_id[0] + 1
             y = row_id[1] - row_id[0] + 1
 
@@ -227,8 +227,6 @@ class GetCoverage(WCSOperation):
             # self._encoder.generate_image_on_disk(wcs.geo_array, enc, x=x, y=y, band_size=band_size)
         else:
             nodes = []
-            col_id = wcs.col_id
-            row_id = wcs.row_id
             time_id = wcs.time_id
             geo = wcs.get_geo_array()
             bounded_by = GML_MAKER(
@@ -278,12 +276,16 @@ class GetCoverage(WCSOperation):
             # SciDB data
             time_series = []
 
-            # a = [" ".join(x.tolist()) for x in np.hstack((wcs.data.T.real, wcs.data.T.imag)).flat]
-
             # Stack array splitting by z dimension and then, uses flat to iterate over all
+            import datetime
+            start = datetime.datetime.now()
+            print("Stacking...")
             for i in np.hstack(wcs.data.T.real).T.flat:
                 time_series.append(" ".join(map(str, i.tolist())))
-
+            print("Stacked")
+            end = datetime.datetime.now() - start
+            print start.strftime("hh:mm:ss")
+            print str(end)
             range_set = GML_MAKER(
                 "rangeSet",
                 GML_MAKER(

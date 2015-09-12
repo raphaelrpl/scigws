@@ -142,7 +142,7 @@ class WCS(object):
                 self._get_bands_from(rangesubset)
 
             # if len(self.bands) == 1:
-            self.data = self.query.toarray()
+            # self.data = self.query.toarray()
             # else:
             #     array = data.toarray()
             #     self.data = {}

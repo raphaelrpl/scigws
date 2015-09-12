@@ -30,7 +30,6 @@ class TIFFEncoder(ImageEncoder):
 
     def generate_image_on_disk(self, metadata, data, x, y, band_size):
         driver = gdal.GetDriverByName('GTiff')
-        print(driver)
         times = metadata.get_min_max_time()
         self.file_name = "{}_mod09q1_{}_{}.tif".format(datetime.now().strftime("%d-%M-%Y"),
                                                   times[0][:10],
