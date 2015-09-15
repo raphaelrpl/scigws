@@ -99,7 +99,7 @@ class SciDB(scidbapi.Connection):
     objects = None
     result_set = None
 
-    def __init__(self, host, port=1239):
+    def __init__(self, host="localhost", port=1239):
         try:
             db = scidbapi.swig.getSciDB()
             handle = db.connect(str(host), port=int(port))
@@ -115,77 +115,86 @@ class SciDB(scidbapi.Connection):
                 scidbapi.swig.ConstChunkIterator.IGNORE_OVERLAPS) |
             (
                 scidbapi.swig.ConstChunkIterator.IGNORE_EMPTY_CELLS))
-
         while not chunkiter.end():
+            coordinates = chunkiter.getPosition()
             if not chunkiter.isEmpty():
                 dataitem = chunkiter.getItem()
                 array.append(scidbapi.getTypedValue(dataitem, attribute[2]))
+
             chunkiter.increment_to_next()
         # Putting array in queue (shared object - concurrency?)
-        print("Done -> {}".format(len(array)))
-        shared_object.put(
-            (
-                (attribute[0], attribute[2]),
-                array
-            )
-        )
+        shared_object.put(((attribute[0], attribute[2]), array))
+
+    def _parallel_to_array(self, x, y, t, shared_object):
+        pass
 
     def executeQuery(self, query, lang="afl"):
-        result = super(SciDB, self).executeQuery(query, lang)
-        desc = result.array.getArrayDesc()
+        return super(SciDB, self).executeQuery(query, lang)
+        # desc = result.array.getArrayDesc()
         # attributes = desc.getAttributes()
         # attributes = [attributes[i] for i in xrange(attributes.size()) if attributes[i].getName() != "EmptyTag"]
         # self.attributes = [attribute.getName() for attribute in attributes]
         # self.result_set = SciDBResultSet(result)
+        # return result
             # self.objects[",".join([str(v) for v in key])] = value
 
-        attrs = desc.getAttributes()
-
-        iters = []
-
-        processes = []
-
-        attributes = [(attrs[i].getName(), result.array.getConstIterator(i), attrs[i].getType()) for i in xrange(
-            attrs.size()) if attrs[i].getName() != "EmptyTag"]
+        # attrs = desc.getAttributes()
+        #
+        # processes = []
+        #
+        # attributes = []
+        # dtypes = []
+        # for i in xrange(attrs.size()):
+        #     if attrs[i].getName() != "EmptyTag":
+        #         name = attrs[i].getName()
+        #         iterator = result.array.getConstIterator(i)
+        #         attribute_type = attrs[i].getType()
+        #         attributes.append((name, iterator, attribute_type))
+        #         dtypes.append((name, attribute_type))
+        #
+        # import datetime
+        # import numpy as np
+        # import collections
+        #
+        # output = collections.defaultdict(list)
+        #
         # queue = Queue()
-
-        import datetime
-        import numpy as np
-        start = datetime.datetime.now()
-
-        output = []
-        types = []
-        queues = []
-        while not attributes[0][1].end():
-            for i in xrange(len(attributes)):
-                queue = Queue()
-                process = Process(target=self._parallel_getter_object, args=(attributes[i], queue))
-                processes.append(process)
-                process.start()
-                queues.append(queue)
-
-            for queue in queues:
-                band, values = queue.get()
-                types.append(band)
-                output.append(tuple(values))
-
-            for i in xrange(len(attributes)):
-                processes[i].join()
-
-            for i in xrange(len(attributes)):
-                attributes[i][1].increment_to_next()
-
-        end = datetime.datetime.now() - start
-        print(str(end))
-
-        print("Output -> {} \n{}".format(len(output), map(len, output)))
-        print(types)
-
-        # dtype = np.dtype(types)
-        # print(output)
-        # array = np.array(output, dtype=dtype)
-        # print(array.size)
-        return result
+        #
+        # x, y, t = 400, 400, 2
+        #
+        # size = len(attributes)
+        # start = datetime.datetime.now()
+        # while not attributes[0][1].end():
+        #     for i in xrange(size):
+        #         process = Process(target=self._parallel_getter_object, args=(attributes[i], queue))
+        #         processes.append(process)
+        #         process.start()
+        #
+        #     for i in xrange(size):
+        #         band, values = queue.get()
+        #         output[band[0]].append(tuple(values))
+        #
+        #     for i in xrange(size):
+        #         processes[i].join()
+        #
+        #     for i in xrange(size):
+        #         attributes[i][1].increment_to_next()
+        #
+        # dt = np.dtype(dtypes)
+        # array = np.zeros((x, y, t), dt)
+        # for band_name in output:
+        #     arr = np.array(output[band_name])
+        #     array[band_name] = arr.reshape((x, y, t))
+        # # for band_name in output:
+        # #     array[band_name][inds] = output[band_name]
+        # # commands
+        # print(array)
+        # end = datetime.datetime.now() - start
+        # print(str(end))
+        #
+        # print("Done")
+        #
+        # return result
 
     def __del__(self):
         if self.result_set:

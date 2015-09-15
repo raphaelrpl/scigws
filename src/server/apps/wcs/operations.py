@@ -10,7 +10,9 @@ from apps.geo.models import GeoArrayTimeLine, GeoArray
 from apps.ows.base import Operation
 
 from scidbpy import connect
-import numpy as np
+from datetime import datetime
+
+import numpy
 
 
 class WCSOperation(Operation):
@@ -220,11 +222,6 @@ class GetCoverage(WCSOperation):
             # Let parallel reshape save
             self._encoder.process_data(wcs, x, y, fact)
 
-            # Bands size
-            # band_size = len(wcs.bands)
-
-            # Generate image and save temporarily
-            # self._encoder.generate_image_on_disk(wcs.geo_array, enc, x=x, y=y, band_size=band_size)
         else:
             nodes = []
             time_id = wcs.time_id
@@ -276,16 +273,33 @@ class GetCoverage(WCSOperation):
             # SciDB data
             time_series = []
 
-            # Stack array splitting by z dimension and then, uses flat to iterate over all
-            import datetime
-            start = datetime.datetime.now()
-            print("Stacking...")
-            for i in np.hstack(wcs.data.T.real).T.flat:
+            # # Get one of bands to help in for
+            # band_dummy = wcs.data.keys()[0]
+
+            # init time
+            start = datetime.now()
+
+            # # Stack array splitting by z dimension and then, uses flat to iterate over all
+            # for i in numpy.hstack(wcs.data.T.real).T.flat:
+            for i in wcs.data.flat:
                 time_series.append(" ".join(map(str, i.tolist())))
-            print("Stacked")
-            end = datetime.datetime.now() - start
-            print start.strftime("hh:mm:ss")
-            print str(end)
+            # TODO: Parallel this
+            # Prepare list of values in GML format
+            # For each time
+            # for t in xrange(len(wcs.data[band_dummy])):
+            #     # For each cell value
+            #     lines = []
+            #     for j in xrange(len(wcs.data[band_dummy][0])):
+            #         attributes = []
+            #         for band in wcs.data.keys():
+            #             attributes.append(wcs.data[band][t][j])
+            #         lines.append(" ".join(map(str, attributes)))
+            #     time_series.append(",".join(lines))
+
+            # end time
+            end = datetime.now() - start
+            print("Time spend in GML print -> {}".format(str(end)))
+
             range_set = GML_MAKER(
                 "rangeSet",
                 GML_MAKER(
