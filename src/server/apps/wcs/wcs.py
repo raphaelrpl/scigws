@@ -116,17 +116,17 @@ class WCS(object):
         # Putting array in queue (shared object - concurrency?)
         shared_object.put((attribute[0], array))
 
-    # def _get_iterators_from_scidb(self, query, attrs, index, shared_object, shared_dtypes):
-    def _get_iterators_from_scidb(self, query, attrs, index, shared_object):
+    def _get_iterators_from_scidb(self, query, attrs, index, shared_object, shared_dtypes):
+    # def _get_iterators_from_scidb(self, query, attrs, index, shared_object):
         dtype = []
         name = attrs[index].getName()
         iterator = query.array.getConstIterator(index)
         print("Iterator -> {}".format(iterator))
         attribute_type = attrs[index].getType()
         attributes = (name, iterator, attribute_type)
-        # shared_object.append(attributes)
-        # shared_dtypes.append((name, attribute_type))
-        shared_object.put((attributes, dtype))
+        shared_object.append(attributes)
+        shared_dtypes.append((name, attribute_type))
+        # shared_object.put((attributes, dtype))
 
     def get_scidb_data(self, statement, lang="afl"):
         """
@@ -167,23 +167,23 @@ class WCS(object):
 
         for i in xrange(attrs.size()):
             if attrs[i].getName() != "EmptyTag":
+                name = attrs[i].getName()
+                iterator = query.array.getConstIterator(i)
+                attribute_type = attrs[i].getType()
+                attributes.append((name, iterator, attribute_type))
+                self.dtypes.append((name, attribute_type))
                 # process = Thread(target=self._get_iterators_from_scidb, args=(query, attrs, i, attributes, self.dtypes))
                 # process = Process(target=self._get_iterators_from_scidb, args=(query, attrs, i, queue))
                 # processes.append(process)
                 # process.start()
-        #
-        # for i in xrange(attrs.size()):
+
+        # for i in xrange(len(processes)):
         #     att, dtype = queue.get()
         #     attributes.append(att)
         #     self.dtypes.extend(dtype)
 
         # for process in processes:
         #     process.join()
-                name = attrs[i].getName()
-                iterator = query.array.getConstIterator(i)
-                attribute_type = attrs[i].getType()
-                attributes.append((name, iterator, attribute_type))
-                self.dtypes.append((name, attribute_type))
 
         del processes[:]
         ed = datetime.now() - st

@@ -34,7 +34,7 @@ class TIFFEncoder(ImageEncoder):
         self.file_name = "{}_mod09q1_{}_{}.tif".format(datetime.now().strftime("%d-%M-%Y"),
                                                   times[0][:10],
                                                   times[1][:10])
-        dataset = driver.Create(self.file_name, y, x, band_size, gdal.GDT_UInt16)
+        dataset = driver.Create(self.file_name, y, x, band_size, gdal.GDT_Int16)
         # TODO: Should have another way
         for i in xrange(band_size):
             band_name, band_values = data.get()
