@@ -12,6 +12,8 @@ from apps.ows.exception import MissingParameterValue, InvalidParameterValue
 # Lib for parallel scidb data
 from multiprocessing import Process, Queue
 
+from scidbpy import connect
+
 from threading import Thread
 
 # numpy array
@@ -75,16 +77,22 @@ class WCS(object):
                 dimension = args
             else:
                 dimension = map(int, args)
+                # dimension = map(int, args)
             if len(sub) > 1:
                 epsg = sub[1].split('(')[0]
             else:
                 epsg = ''
+
             if not is_valid_url(epsg):
                 epsg = ''
-            params[key] = {'epsg': epsg, 'dimension': dimension}
-            if key != self.geo_array.x_dim_name and key != self.geo_array.y_dim_name \
-                    and key != self.geo_array.t_dim_name:
+
+            # if key != self.geo_array.x_dim_name and key != self.geo_array.y_dim_name \
+            #         and key != self.geo_array.t_dim_name:
+            if key != "lat" and key != "long" and key != "time_id":
                 raise InvalidAxisLabel("\"%s\" is not valid axis. " % sub, locator="subset", version="2.0.1")
+
+            params[key] = {'epsg': epsg, 'dimension': dimension}
+
         return params
 
     def _get_bands_from(self, bands):
@@ -142,6 +150,15 @@ class WCS(object):
         scidb = SciDB()
 
         query = scidb.executeQuery(query=statement, lang=lang)
+        #
+        # con = connect()
+        #
+        # af = con.afl
+        # res = af.between("mod09q1", 43200, 33600, 0, 43300, 33700, 0)
+        #
+        # ar = res.toarray()
+        #
+        # print(ar)
 
         # Lets parallel the processing to get scidb data
         # Get SciDB Description
@@ -233,6 +250,19 @@ class WCS(object):
             array[attribute] = band_arr
 
         end = datetime.now() - begin
+        #
+        # print(array.shape)
+        # print(array)
+        #
+        # print(ar == array)
+        #
+        # import gdal
+        #
+        # driver = gdal.GetDriverByName('GTiff')
+        #
+        # self.file_name = "tomate.tiff"
+        # dataset = driver.Create(self.file_name, 101, 101, 1, gdal.GDT_Int16)
+        # dataset.GetRasterBand(1).WriteArray(array['red'].reshape(101, 101))
 
         del self.data
         self.data = array
@@ -258,7 +288,7 @@ class WCS(object):
         if not self.geo_arrays:
             raise NoSuchCoverageException()
 
-    def get_coverage(self, coverageid, subset=None, rangesubset=None, format="GML", inputcrs=4236,
+    def get_coverage(self, coverageid, subset=None, rangesubset=None, format="GML", inputcrs=4326,
                      outputcrs=4326):
         if not coverageid:
             raise MissingParameterValue("Missing coverageID parameter", locator="coverageID", version="2.0.1")
@@ -266,10 +296,38 @@ class WCS(object):
             raise InvalidParameterValue("Invalid coverage with id \"%s\"" % "".join(coverageid), locator="coverageID", version="2.0.1")
         try:
             self.geo_array = GeoArray.objects.get(name=coverageid[0])
+
             if subset:
                 subset = self._get_subset_from(subset)
-            self.col_id = subset.get('col_id', {}).get('dimension', self.geo_array.get_x_dimension())
-            self.row_id = subset.get('row_id', {}).get('dimension', self.geo_array.get_y_dimension())
+
+            # col_id = subset.get('col_id', {}).get('dimension')
+            # row_id = subset.get('row_id', {}).get('dimension')
+
+            col_id = subset.get('long', {}).get('dimension')
+            row_id = subset.get('lat', {}).get('dimension')
+
+            array_x = self.geo_array.get_x_dimension()
+            array_y = self.geo_array.get_y_dimension()
+            limits = {"min": [array_x[0], array_y[0]],
+                      "max": [array_x[1], array_y[1]],
+                      "crs": 4326}  # TODO: get it from coverage object
+
+            # check if there terralibpython srs converter available
+            if terralib and True is False:
+                module = terralib.TerralibPY()
+                if col_id:
+                    # todo: improve it. It does not check all possibilities
+                    lon1, lat1 = col_id[0], row_id[0] if row_id else self.geo_array.get_y_dimension()[0]
+                    lon2, lat2 = col_id[1], row_id[1] if row_id else self.geo_array.get_y_dimension()[0]
+
+                    col_id = module.project_to(lat1, lon1, inputcrs, limits)
+                    row_id = module.project_to(lat2, lon2, inputcrs, limits)
+            else:
+                print("Terralib not found")
+
+            self.col_id = col_id if col_id else self.geo_array.get_x_dimension()
+            self.row_id = row_id if row_id else self.geo_array.get_y_dimension()
+
             time_id = subset.get('time_id', {}).get('dimension', self.geo_array.get_min_max_time())
             times_day_year = [DateToPoint.format_to_day_of_year(d) for d in time_id]
 
@@ -282,10 +340,10 @@ class WCS(object):
 
             self.time_id = [validator(t) for t in times_day_year]
 
-            afl = "subarray({}, {}, {}, {}, {}, {}, {})".format(self.geo_array.name,
-                                                                self.col_id[0], self.row_id[0],
-                                                                self.time_id[0], self.col_id[1],
-                                                                self.row_id[1],self.time_id[1])
+            afl = "between({}, {}, {}, {}, {}, {}, {})".format(self.geo_array.name,
+                                                               self.col_id[0], self.row_id[0],
+                                                               self.time_id[0], self.col_id[1],
+                                                               self.row_id[1], self.time_id[1])
 
             # Check if there are any range subset and if it is valid
             if rangesubset:

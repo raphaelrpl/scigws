@@ -192,7 +192,7 @@ class GetCoverage(WCSOperation):
         # Check if it has image response or xml response
         default_format = "application/xml"
         fmt = params.get('format', ' ')[0].lower()
-        if fmt == default_format:
+        if fmt == ' ' or fmt == default_format:
             encoder = XMLEncoder()
         else:
             for klass in type.__subclasses__(ImageEncoder):
@@ -283,18 +283,6 @@ class GetCoverage(WCSOperation):
             # for i in numpy.hstack(wcs.data.T.real).T.flat:
             for i in wcs.data.flat:
                 time_series.append(" ".join(map(str, i.tolist())))
-            # TODO: Parallel this
-            # Prepare list of values in GML format
-            # For each time
-            # for t in xrange(len(wcs.data[band_dummy])):
-            #     # For each cell value
-            #     lines = []
-            #     for j in xrange(len(wcs.data[band_dummy][0])):
-            #         attributes = []
-            #         for band in wcs.data.keys():
-            #             attributes.append(wcs.data[band][t][j])
-            #         lines.append(" ".join(map(str, attributes)))
-            #     time_series.append(",".join(lines))
 
             # end time
             end = datetime.now() - start
